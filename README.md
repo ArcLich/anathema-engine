@@ -1,4 +1,4 @@
-# chessai
+# Anathema Engine
 WIP classical chess engine
 
 10/27/21 v1.0.1
