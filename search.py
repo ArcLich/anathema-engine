@@ -1,3 +1,7 @@
+"""
+Not Magnus
+Classical chess engine by Devin Zhang
+"""
 import chess
 import chess.polyglot
 from evaluate import *
@@ -7,8 +11,8 @@ def search(board, depth, alpha, beta):
     """
     Searches the possible moves using negamax, alpha-beta pruning, and a transposition table
 
-    TODO IMPROVEMENTS
-    - move ordering + legal move generation
+    TODO
+    - move ordering + legal move  (bitboards)
     - aspiration search
     - pv search (or negascout)
     - iterative deepening
@@ -38,7 +42,7 @@ def search(board, depth, alpha, beta):
 
     # Add position to the transposition table
     if depth == 0 or board.is_game_over():
-        score = -evaluate(board)
+        score = -evaluate(board) # TODO why is it negative of the value??
         
         if (score <= alpha):
             ttable[key] = (score, "LOWERBOUND", depth) # Score is lowerbound
@@ -84,7 +88,6 @@ def cpu_move(board):
     Else compute move
 
     TODO add endgame book
-    TODO plays like crap on even depths?
     """
     global OPENING
 

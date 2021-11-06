@@ -1,3 +1,7 @@
+"""
+Not Magnus
+Classical chess engine by Devin Zhang
+"""
 import chess
 from util import *
 
@@ -11,11 +15,10 @@ def evaluate(board):
 
     https://github.com/official-stockfish/Stockfish/blob/master/src/evaluate.cpp
 
-    TODO IMPLEMENTATION
+    TODO
     - mobility
     - pawn structure
     - king safety
-
     - Texel's tuning method
 
     gives bonus to:
@@ -50,12 +53,12 @@ def evaluate(board):
     king_value = 99999
 
     material_score = 0
-    material_score += (get_num_pieces(board, chess.PAWN, not board.turn) - get_num_pieces(board, chess.PAWN, board.turn)) * pawn_value
-    material_score += (get_num_pieces(board, chess.KNIGHT, not board.turn) - get_num_pieces(board, chess.KNIGHT, board.turn)) * knight_value
-    material_score += (get_num_pieces(board, chess.BISHOP, not board.turn) - get_num_pieces(board, chess.BISHOP, board.turn)) * bishop_value
-    material_score += (get_num_pieces(board, chess.ROOK, not board.turn) - get_num_pieces(board, chess.ROOK, board.turn)) * rook_value
-    material_score += (get_num_pieces(board, chess.QUEEN, not board.turn) - get_num_pieces(board, chess.QUEEN, board.turn)) * queen_value
-    material_score += (get_num_pieces(board, chess.KING, not board.turn) - get_num_pieces(board, chess.KING, board.turn)) * king_value
+    material_score += (len(board.pieces(chess.PAWN, not board.turn)) - len(board.pieces(chess.PAWN, board.turn))) * pawn_value
+    material_score += (len(board.pieces(chess.KNIGHT, not board.turn)) - len(board.pieces(chess.KNIGHT, board.turn))) * knight_value
+    material_score += (len(board.pieces(chess.BISHOP, not board.turn)) - len(board.pieces(chess.BISHOP, board.turn))) * bishop_value
+    material_score += (len(board.pieces(chess.ROOK, not board.turn)) - len(board.pieces(chess.ROOK, board.turn))) * rook_value
+    material_score += (len(board.pieces(chess.QUEEN, not board.turn)) - len(board.pieces(chess.QUEEN, board.turn))) * queen_value
+    material_score += (len(board.pieces(chess.KING, not board.turn)) - len(board.pieces(chess.KING, board.turn))) * king_value
 
 
     # Pieces-squares table eval
@@ -314,11 +317,11 @@ def evaluate(board):
     total_phase = pawn_phase*16 + knight_phase*4 + bishop_phase*4 + rook_phase*4 + queen_phase*2
 
     phase = total_phase
-    phase -= get_num_pieces(board, chess.PAWN) * pawn_phase
-    phase -= get_num_pieces(board, chess.KNIGHT) * knight_phase
-    phase -= get_num_pieces(board, chess.BISHOP) * bishop_phase
-    phase -= get_num_pieces(board, chess.ROOK) * rook_phase
-    phase -= get_num_pieces(board, chess.QUEEN) * queen_phase
+    phase -= (len(board.pieces(chess.PAWN, chess.WHITE)) + len(board.pieces(chess.PAWN, chess.BLACK))) * pawn_phase
+    phase -= (len(board.pieces(chess.KNIGHT, chess.WHITE)) + len(board.pieces(chess.KNIGHT, chess.BLACK))) * knight_phase
+    phase -= (len(board.pieces(chess.BISHOP, chess.WHITE)) + len(board.pieces(chess.BISHOP, chess.BLACK))) * bishop_phase
+    phase -= (len(board.pieces(chess.ROOK, chess.WHITE)) + len(board.pieces(chess.ROOK, chess.BLACK))) * rook_phase
+    phase -= (len(board.pieces(chess.QUEEN, chess.WHITE)) + len(board.pieces(chess.KNIGHT, chess.BLACK))) * queen_phase
 
     phase = (phase * 256 + (total_phase / 2)) / total_phase;
 
