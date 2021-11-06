@@ -4,7 +4,7 @@ WIP classical chess engine
 11/5/21 v1.1
 > Implemented a transposition table, and cleaned up the code for search algorithim while I was at it; now much more readable.
 >
-> Removed child board generation and just used make/unmake moves. Identified some other speed bottlenecks that I will attempt to get resolved in the next update.
+> Removed child board generation and just used make/unmake moves. Identified some other speed bottlenecks that I will attempt to get resolved in a future update.
 >
 > For some reason it will occasionally throw away pieces. Need to take a look at the evaluation algorithim.
 
