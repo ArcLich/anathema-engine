@@ -1,6 +1,10 @@
 # Anathema Engine
 WIP classical chess engine
 
+11/5/21 v1.1
+> Implemented a transposition table, and cleaned up the code for search algorithim while I was at it; now much more readable.
+> Identified some speed bottlenecks that I will attempt to get resolved in the next update.
+
 10/27/21 v1.0.1
 > Changed the alpha-beta minimax function to an alpha-beta negamax. Preparing to implement a transposition table.
 
