@@ -1,4 +1,4 @@
-# Anathema Engine
+# Not Magnus Engine
 WIP classical chess engine
 
 11/6/21 v1.1.1
