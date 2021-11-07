@@ -6,7 +6,7 @@ WIP classical chess engine
 >
 > To support the key function in the sort(), had to change board to a glbal variable rather than a local one in the driver.
 
-11/6/21 v1.1.2
+11/6/21 v1.1.1
 > Changed transposition table to use the built-in zobrist hashes as keys instead of string epd representations of the board.
 >
 > Optimized evaluation function by removing reliance on iterating over entire board multiple times per call. Improved search depth from 3 to 4.
