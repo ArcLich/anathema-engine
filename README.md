@@ -9,7 +9,7 @@ WIP classical chess engine
 11/6/21 v1.1.2
 > Changed transposition table to use the built-in zobrist hashes as keys instead of string epd representations of the board.
 >
-> Optimized evaluation function by removing reliance on iterating over entire board multiple times per call. Time save increased search depth from 3 to 4.
+> Optimized evaluation function by removing reliance on iterating over entire board multiple times per call. Improved search depth from 3 to 4.
 
 11/5/21 v1.1
 > Implemented a transposition table, and cleaned up the code for search algorithim while I was at it; now much more readable.
