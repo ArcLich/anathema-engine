@@ -1,5 +1,7 @@
 # Not Magnus
-WIP classical chess engine
+WIP classical chess engine.
+
+Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Book.bin`, or turn off opening book usage by setting `OPENING` to `False` in `util.py`.
 
 11/7/21 v1.2
 > Introduced move ordering for the alpha-beta negamax, improved search depth from 4 to 5. Some odd moves are being played from the increase, and search time in the middlegame could be improved.
@@ -23,6 +25,6 @@ WIP classical chess engine
 
 10/12/21 v1.0
 > Implements a simple search with alpha-beta minimax and uses an evaluation function that utilizes material eval, piece-squares tables, and tapered eval.
-Optimizations need to be done and there are a few known issues. Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Book.bin`, or turn off opening book usage by setting `OPENING` to `False`.
+Optimizations need to be done and there are a few known issues.
 > 
 > Plays poorly (I can beat it).
