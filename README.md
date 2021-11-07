@@ -1,6 +1,11 @@
 # Not Magnus
 WIP classical chess engine
 
+11/7/21 v1.2
+> Introduced move ordering for the alpha-beta negamax, improved search depth from 4 to 5. Some odd moves are being played from the increase, and search time in the middlegame could be improved.
+>
+> To support the key function in the sort(), had to change board to a glbal variable rather than a local one in the driver.
+
 11/6/21 v1.1.2
 > Changed transposition table to use the built-in zobrist hashes as keys instead of string epd representations of the board.
 >
