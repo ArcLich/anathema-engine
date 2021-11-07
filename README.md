@@ -4,7 +4,7 @@ WIP classical chess engine.
 Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Book.bin`, or turn off opening book usage by setting `OPENING` to `False` in `util.py`.
 
 11/7/21 v1.2
-> Introduced move ordering for the alpha-beta negamax, greatly improved speed.
+> Introduced move ordering for the alpha-beta negamax, greatly improving speed.
 >
 > To support the key function in the sort(), had to change board to a glbal variable rather than a local one in the driver.
 
