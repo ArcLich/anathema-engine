@@ -5,7 +5,7 @@ Classical chess engine by Devin Zhang
 import chess
 from util import *
 
-def evaluate(board):
+def evaluate():
     """
     Evaluates a board state, returns value. Higher value
     means more advantage for the current player
@@ -314,7 +314,7 @@ def evaluate(board):
     bishop_phase = 1
     rook_phase = 2
     queen_phase = 4
-    total_phase = pawn_phase*16 + knight_phase*4 + bishop_phase*4 + rook_phase*4 + queen_phase*2
+    total_phase = 16*pawn_phase + 4*knight_phase + 4*bishop_phase + 4*rook_phase + 2*queen_phase
 
     phase = total_phase
     phase -= (len(board.pieces(chess.PAWN, chess.WHITE)) + len(board.pieces(chess.PAWN, chess.BLACK))) * pawn_phase
@@ -327,7 +327,7 @@ def evaluate(board):
 
     psqt_score = 0
     pieces_dict = board.piece_map()
-    for pos in pieces_dict:
+    for pos in pieces_dict: #TODO could probably be optimized, at least with numpy to make the lists more efficient. Bitboards seem better though
         piece = pieces_dict[pos]
         if piece.color != board.turn:
             value = 1

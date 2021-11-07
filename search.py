@@ -7,7 +7,7 @@ import chess.polyglot
 from evaluate import *
 from util import *
 
-def search(board, depth, alpha, beta):
+def negamax(depth, alpha, beta):
     """
     Searches the possible moves using negamax, alpha-beta pruning, and a transposition table
 
@@ -42,7 +42,7 @@ def search(board, depth, alpha, beta):
 
     # Add position to the transposition table
     if depth == 0 or board.is_game_over():
-        score = -evaluate(board) # TODO why is it negative of the value??
+        score = -evaluate() # TODO why is it negative of the value??
         
         if (score <= alpha):
             ttable[key] = (score, "LOWERBOUND", depth) # Score is lowerbound
@@ -57,9 +57,11 @@ def search(board, depth, alpha, beta):
         score = 0
         best_move = ""
         best_score = -INF
-        for move in list(board.legal_moves):
+        moves = list(board.legal_moves)
+        moves.sort(key = rate, reverse = True)
+        for move in moves:
             board.push(move)
-            score = -search(board, depth - 1, -beta, -alpha)[1]
+            score = -negamax(depth - 1, -beta, -alpha)[1]
             board.pop()
 
             if score > best_score:
@@ -81,7 +83,7 @@ def search(board, depth, alpha, beta):
         return (best_move, best_score)
 
 
-def cpu_move(board):
+def cpu_move():
     """
     Chooses a move for the CPU
     If inside opening book make book move
@@ -100,4 +102,4 @@ def cpu_move(board):
             except IndexError:
                 opening_book.close()
                 OPENING = False
-    return search(board, DEPTH, -INF, INF)[0]
+    return negamax(DEPTH, -INF, INF)[0]
