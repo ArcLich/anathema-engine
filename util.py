@@ -8,7 +8,7 @@ import IPython.display
 
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
-DEPTH = 5 # Search depth, minimum 1
+DEPTH = 4 # Search depth, minimum 1
 OPENING = False # Use opening book?
 
 # Constants
