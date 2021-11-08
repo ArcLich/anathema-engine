@@ -7,6 +7,10 @@ Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-ches
 > Introduced move ordering for the alpha-beta negamax, greatly improving speed.
 >
 > To support the key function in the sort(), had to change board to a glbal variable rather than a local one in the driver.
+> 
+> Now clears the transposition table after each pawn move.
+> 
+> Preparing to implement iterative deepending and MTD(f) search.
 
 11/6/21 v1.1.1
 > Changed transposition table to use the built-in zobrist hashes as keys instead of string epd representations of the board.
