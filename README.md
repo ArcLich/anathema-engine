@@ -3,6 +3,11 @@ WIP classical chess engine.
 
 Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Book.bin`, or turn off opening book usage by setting `OPENING` to `False` in `util.py`.
 
+11/10/21 v1.3.1
+> GUI will now flip board if playing as black.
+> 
+> After testing, engine seems comparable to my skill level (~1050 elo).
+
 11/8/21 v1.3
 > Implemented MTD(f), but was not able to get iterative deepening to work. Searches at depth 4 and below are now wicked fast.
 
