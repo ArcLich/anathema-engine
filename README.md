@@ -6,7 +6,7 @@ Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-ches
 11/10/21 v1.3.1
 > GUI will now flip board if playing as black.
 > 
-> After testing, engine seems comparable to my skill level (~1050 elo). It is not very strong in the endgame, and will occasionally begin a trade of pieces but forget to take back.
+> After testing, engine seems comparable to my skill level (~1050 elo). It is not very strong in the endgame, and will occasionally begin a trade of pieces but forget to take back. This can likely be addressed with quiescence search.
 
 11/8/21 v1.3
 > Implemented MTD(f), but was not able to get iterative deepening to work. Searches at depth 4 and below are now wicked fast.
