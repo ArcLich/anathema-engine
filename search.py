@@ -86,6 +86,10 @@ def negamax(depth, alpha, beta):
 
         
 def MTDf(depth, guess):
+    """
+    Searches the possible moves using negamax but zooming in on the window
+    """
+    # Psuedocode and algorithm from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     upperbound = INF
     lowerbound = -INF
     best_move = ""

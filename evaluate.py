@@ -10,16 +10,18 @@ def evaluate():
     Evaluates a board state, returns value. Higher value
     means more advantage for the current player
 
+    Utilizes material score and piece-squares tables
+
     NOTES: function looks at a board after the cpu has made a proposed move, so board.turn is reversed:
            returns BLACK if WHITE to play, and WHITE if BLACK to play
-
-    https://github.com/official-stockfish/Stockfish/blob/master/src/evaluate.cpp
 
     TODO
     - mobility
     - pawn structure
     - king safety
     - Texel's tuning method
+    - king tropism
+    - center control?
 
     gives bonus to:
     - batteries

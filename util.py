@@ -3,13 +3,14 @@ Not Magnus
 Classical chess engine by Devin Zhang
 """
 import chess
+import chess.svg
 import IPython.display
 
 
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
 DEPTH = 4 # Search depth, minimum 1
-OPENING = False # Use opening book?
+OPENING = True # Use opening book?
 
 # Constants
 INF = float("inf")
@@ -24,7 +25,15 @@ def display():
     Clears cell and displays visual board
     """
     IPython.display.clear_output(wait = True)
-    IPython.display.display(board)
+    if START_AS == "WHITE":
+        orientation = chess.WHITE
+    else:
+        orientation = chess.BLACK
+    if board.move_stack:
+        lastmove = board.peek()
+    else:
+        lastmove = None
+    IPython.display.display(chess.svg.board(board, orientation = orientation, lastmove = lastmove, size = 350))
 
 
 def rate(move):
@@ -38,6 +47,11 @@ def rate(move):
 
     Values are arbitrary, and only useful when comparing whether
     one is higher or lower than the other
+
+    TODO
+    Implement killer heuristic after promotions/equals captures,
+    and history heuristic after that, with losing caputures remaining
+    penultimate
     """
     if board.is_capture(move):
         if board.is_en_passant(move):
