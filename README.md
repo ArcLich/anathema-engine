@@ -3,6 +3,16 @@ WIP classical chess engine.
 
 Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Opening Book/Book.bin`, or turn off opening book usage by setting `OPENING_BOOK` to `False` in `util.py`.
 
+Current features:
+- Alpha-beta negamax search
+- Move ordering enhancement
+- Transposition table
+- MTD(f) search
+- Opening book
+- Material score evaluation
+- Piece-squares table evaluation
+- Tapered evaluation
+
 11/10/21 v1.3.1
 > GUI will now flip board if playing as black.
 > 
