@@ -1,7 +1,7 @@
 # Not Magnus
 WIP classical chess engine.
 
-Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Opening TB/Book.bin`, or turn off opening book usage by setting `OPENING` to `False` in `util.py`.
+Uses codekiddy2's [opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/). To run, download and save as `Opening TB/Book.bin`, or turn off opening book usage by setting `OPENING_B` to `False` in `util.py`.
 
 11/10/21 v1.3.1
 > GUI will now flip board if playing as black.
