@@ -10,17 +10,17 @@ import IPython.display
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
 DEPTH = 4 # Search depth, minimum 1
-OPENING = True # Use opening book?
+OPENING_BOOK = True # Use opening book?
+ENDGAME_BOOK = True # Use endgame book?
 
 # Constants
 INF = float("inf")
 
 # Other
-board = chess.Board()
 ttable = {} # Transposition table
 
 
-def display():
+def display(board):
     """
     Clears cell and displays visual board
     """
@@ -36,7 +36,7 @@ def display():
     IPython.display.display(chess.svg.board(board, orientation = orientation, lastmove = lastmove, size = 350))
 
 
-def rate(move):
+def rate(board, move):
     """
     Rates a move in relation to the following order:
     - Winning captures (low value piece captures high value piece)
@@ -60,3 +60,14 @@ def rate(move):
     if move.promotion:
         return 0
     return -99999
+
+
+def get_num_pieces(board):
+    """
+    Get the number of pieces of all types and color on the board.
+    """
+    num = 0
+    for color in chess.COLORS:
+        for piece in chess.PIECE_TYPES:
+            num += (len(board.pieces(piece, color)))
+    return num

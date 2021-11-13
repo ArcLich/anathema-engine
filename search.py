@@ -4,10 +4,11 @@ Classical chess engine by Devin Zhang
 """
 import chess
 import chess.polyglot
+import chess.gaviota
 from evaluate import *
 from util import *
 
-def negamax(depth, alpha, beta):
+def negamax(board, depth, alpha, beta):
     """
     Searches the possible moves using negamax, alpha-beta pruning, and a transposition table
 
@@ -41,7 +42,7 @@ def negamax(depth, alpha, beta):
 
     # Add position to the transposition table
     if depth == 0 or board.is_game_over():
-        score = -evaluate() # TODO why is it negative of the value??
+        score = -evaluate(board) # TODO why is it negative of the value??
         
         if score <= alpha: # Score is lowerbound
             ttable[key] = (score, "", "LOWERBOUND", depth)
@@ -57,10 +58,10 @@ def negamax(depth, alpha, beta):
         best_move = ""
         best_score = -INF
         moves = list(board.legal_moves)
-        moves.sort(key = rate, reverse = True)
+        moves.sort(key = lambda move : rate(board, move), reverse = True)
         for move in moves:
             board.push(move)
-            score = -negamax(depth - 1, -beta, -alpha)[1]
+            score = -negamax(board, depth - 1, -beta, -alpha)[1]
             board.pop()
 
             if score > best_score:
@@ -85,7 +86,7 @@ def negamax(depth, alpha, beta):
         return (best_move, best_score)
 
         
-def MTDf(depth, guess):
+def MTDf(board, depth, guess):
     """
     Searches the possible moves using negamax but zooming in on the window
     """
@@ -98,7 +99,7 @@ def MTDf(depth, guess):
             beta = guess + 1
         else:
             beta = guess
-        best_move, guess = negamax(depth, beta - 1, beta)
+        best_move, guess = negamax(board, depth, beta - 1, beta)
         if guess < beta:
             upperbound = guess
         else:
@@ -106,23 +107,33 @@ def MTDf(depth, guess):
     return (best_move, guess)
 
 
-def cpu_move():
+def cpu_move(board):
     """
     Chooses a move for the CPU
     If inside opening book make book move
+    If inside Gaviota tablebase make tablebase move
     Else compute move
 
     TODO add endgame book
     """
-    global OPENING
+    global OPENING_BOOK
 
-    if OPENING:
-        with chess.polyglot.open_reader("Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
-            try:
+    if OPENING_BOOK:
+        try:
+            with chess.polyglot.open_reader("Opening Book/Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
                 opening = opening_book.choice(board)
                 opening_book.close()
                 return opening.move
-            except IndexError:
-                opening_book.close()
-                OPENING = False
-    return MTDf(DEPTH, 0)[0]
+        except IndexError:
+            OPENING_BOOK = False
+
+    if ENDGAME_BOOK and get_num_pieces(board) <= 5:
+        evals = []
+        for move in list(board.legal_moves):
+            board.push(move)
+            score = eval_endgame(board)
+            board.pop()
+            evals.append((move, score))
+        return max(evals, key = lambda eval : eval[1])[0]
+
+    return MTDf(board, DEPTH, 0)[0]

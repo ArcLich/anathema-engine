@@ -5,12 +5,32 @@ Classical chess engine by Devin Zhang
 import chess
 from util import *
 
-def evaluate():
+
+def eval_endgame(board):
+    """
+    Evaluates an endgame position with 5 or less pieces
+    Returns depth-to-mate from Gaviota endgame tablebase
+    """
+    with chess.gaviota.open_tablebase("Endgame Book") as tablebase:
+        if board.is_checkmate():
+            return INF
+        score = tablebase.get_dtm(board) * 99999
+        if score == 0:
+            return -INF
+        else:
+            return score
+
+
+def evaluate(board):
     """
     Evaluates a board state, returns value. Higher value
     means more advantage for the current player
 
-    Utilizes material score and piece-squares tables
+    Utilizes:
+    - Material score
+    - Piece-squares tables
+    - Tapered evaluation
+    - 5-men Gaviota endgame tablebase (if toggled)
 
     NOTES: function looks at a board after the cpu has made a proposed move, so board.turn is reversed:
            returns BLACK if WHITE to play, and WHITE if BLACK to play
@@ -45,6 +65,11 @@ def evaluate():
     - BISHOP: penalty depending on how many friendly pawns on the same color square as bishop,
       smaller penalty when bishop is outside pawn chain
     """
+    # Gaviota endgame tablebase
+    if ENDGAME_BOOK and get_num_pieces(board) <= 5:
+        eval_endgame(board)
+
+
     # Material eval
     # Values from Tomasz Michniewski's Simplified Evaluation Function
     pawn_value = 100
