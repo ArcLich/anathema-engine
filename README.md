@@ -9,9 +9,15 @@ Current features:
 - Transposition table
 - MTD(f) search
 - Opening book
+- Gaviota endgame tablebase
 - Material score evaluation
 - Piece-squares table evaluation
 - Tapered evaluation
+
+11/12/21 v1.4
+> Search will now look at the Gaviota endgame tablebase (5-men). 
+>
+> Turned board back into a local variable.
 
 11/10/21 v1.3.1
 > GUI will now flip board if playing as black.
