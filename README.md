@@ -13,6 +13,16 @@ Current features:
 - Material score evaluation
 - Piece-squares table evaluation
 - Tapered evaluation
+- Mobility score
+
+11/13/21 v1.4.1
+> Added very basic mobility score evaluation, not sure how much of an effect it has.
+> 
+> Organized evaluation() into separate functions for better modularity.
+> 
+> Fixed a small bug. Gaviota evaluation will now take over at the proper time when there are 7 pieces on the board (5 pieces + 2 kings) instead of 5 pieces on the board.
+> 
+> After some testing, it seems the blunders I've been seeing in games have been caused by the MTD(f) search. Unsure whether this is because I do can not get iterative deepening to work, whether it lacks quiescence search, lack of depth, or some other reasoning. Considering switching over to PVS.
 
 11/12/21 v1.4
 > Search will now look at the Gaviota endgame tablebase (5-men). 
