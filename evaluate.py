@@ -8,10 +8,10 @@ from util import *
 
 def eval_endgame(board):
     """
-    Evaluates an endgame position with 5 or less pieces
+    Evaluates an endgame position with 7 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
     """
-    with chess.gaviota.open_tablebase("Endgame Book") as tablebase:
+    with chess.gaviota.open_tablebase("Endgame Book") as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
         if board.is_checkmate():
             return INF
         score = tablebase.get_dtm(board) * 99999
@@ -21,57 +21,12 @@ def eval_endgame(board):
             return score
 
 
-def evaluate(board):
+def material_eval(board):
     """
-    Evaluates a board state, returns value. Higher value
-    means more advantage for the current player
-
-    Utilizes:
-    - Material score
-    - Piece-squares tables
-    - Tapered evaluation
-    - 5-men Gaviota endgame tablebase (if toggled)
-
-    NOTES: function looks at a board after the cpu has made a proposed move, so board.turn is reversed:
-           returns BLACK if WHITE to play, and WHITE if BLACK to play
-
-    TODO
-    - mobility
-    - pawn structure
-    - king safety
-    - Texel's tuning method
-    - king tropism
-    - center control?
-
-    gives bonus to:
-    - batteries
-    - rooks on open file
-    - rooks on 7th (and 8th?) rank
-    - rooks on semi-open file
-    - passed pawns (the further it is, the higher the bonus)
-    - moves that control the center, espically with pawns
-    - moves that prevent opponent from castling
-    - outposts (either knight or bishop)
-    - bishops on long diagonal that can see both center squares
-
-    penalize:
-    - undefended knights and bishops
-    - doubled pawns (triple too, etc etc)
-    - moves that trade while behind material
-    - developing queen early
-    - trading fianchettoed bishops
-    - rooks on closed files
-    - rooks trapped by the king. penalty worsens if king cannot castle
-    - BISHOP: penalty depending on how many friendly pawns on the same color square as bishop,
-      smaller penalty when bishop is outside pawn chain
+    Evaluate material advantage by finding the difference in
+    material between white and black
+    Values from Tomasz Michniewski's Simplified Evaluation Function
     """
-    # Gaviota endgame tablebase
-    if ENDGAME_BOOK and get_num_pieces(board) <= 5:
-        eval_endgame(board)
-
-
-    # Material eval
-    # Values from Tomasz Michniewski's Simplified Evaluation Function
     pawn_value = 100
     knight_value = 320
     bishop_value = 330
@@ -87,9 +42,15 @@ def evaluate(board):
     material_score += (len(board.pieces(chess.QUEEN, not board.turn)) - len(board.pieces(chess.QUEEN, board.turn))) * queen_value
     material_score += (len(board.pieces(chess.KING, not board.turn)) - len(board.pieces(chess.KING, board.turn))) * king_value
 
+    return material_score
 
-    # Pieces-squares table eval
-    # Values from Ronald Friederich's Rofchade engine
+
+def psqt_eval(board):
+    """
+    Piece-squares tables with tapered evaluation
+    Values from Ronald Friederich's Rofchade engine
+    Tapered eval from Fruit engine
+    """
     w_mg_pawn_table = [
         [0,   0,   0,   0,   0,   0,  0,   0],
         [98, 134,  61,  95,  68, 126, 34, -11],
@@ -335,7 +296,6 @@ def evaluate(board):
         "k": b_eg_king_table,
     }
 
-    # Tapered eval from Fruit engine
     pawn_phase = 0
     knight_phase = 1
     bishop_phase = 1
@@ -366,10 +326,82 @@ def evaluate(board):
         psqt_eg_score = eg_table[7 - int(pos / 8)][pos % 8]
         psqt_score += (((psqt_mg_score * (256 - phase)) + (psqt_eg_score * phase)) / 256) * value
 
+    return psqt_score
 
-    # Final scoring
+
+def mobility_eval(board):
+    """
+    Evaluate mobility by getting the difference between the number of
+    legal moves white has minus the number of legal moves black has
+    """
+    moves = list(board.legal_moves)
+    mobility_score = 0
+    for move in moves:
+        if board.piece_at(move.from_square).color == chess.WHITE:
+            mobility_score += 1
+        else:
+            mobility_score -= 1
+    if board.turn == chess.BLACK:
+        mobility_score *= -1
+    
+    return mobility_score
+
+
+def evaluate(board):
+    """
+    Evaluates a board state, returns value. Higher value
+    means more advantage for the current player
+
+    Utilizes:
+    - Material score
+    - Piece-squares tables
+    - Tapered evaluation
+    - Mobility
+    - 5-men (7 pieces counting kings) Gaviota endgame tablebase (if toggled)
+
+    NOTES: function looks at a board after the cpu has made a proposed move, so board.turn is reversed:
+           returns BLACK if WHITE to play, and WHITE if BLACK to play
+
+    TODO
+    - pawn structure
+    - king safety
+    - Texel's tuning method
+    - king tropism
+    - center control?
+
+    gives bonus to:
+    - batteries
+    - rooks on open file
+    - rooks on 7th (and 8th?) rank
+    - rooks on semi-open file
+    - passed pawns (the further it is, the higher the bonus)
+    - moves that control the center, espically with pawns
+    - moves that prevent opponent from castling
+    - outposts (either knight or bishop)
+    - bishops on long diagonal that can see both center squares
+
+    penalize:
+    - undefended knights and bishops
+    - doubled pawns (triple too, etc etc)
+    - moves that trade while behind material
+    - developing queen early
+    - trading fianchettoed bishops
+    - rooks on closed files
+    - rooks trapped by the king. penalty worsens if king cannot castle
+    - BISHOP: penalty depending on how many friendly pawns on the same color square as bishop,
+      smaller penalty when bishop is outside pawn chain
+    """
+    if ENDGAME_BOOK and get_num_pieces(board) <= 7:
+        eval_endgame(board)
+
     material_weight = 10
     psqt_weight = 1
-    score = (material_score * material_weight) + (psqt_score * psqt_weight)
+    mobility_weight = 1
+
+    material_score = material_eval(board)
+    psqt_score = psqt_eval(board)
+    mobility_score = mobility_eval(board)
+
+    score = (material_score * material_weight) + (psqt_score * psqt_weight) + (mobility_score * mobility_weight)
 
     return score

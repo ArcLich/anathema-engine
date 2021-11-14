@@ -11,6 +11,7 @@ from util import *
 def negamax(board, depth, alpha, beta):
     """
     Searches the possible moves using negamax, alpha-beta pruning, and a transposition table
+    Psuedocode from Jeroen W.T. Carolus
 
     TODO
     - legal move generation (bitboards)
@@ -22,7 +23,6 @@ def negamax(board, depth, alpha, beta):
     - parallel search
     - Quiescence Search
     """
-    # Psuedocode from Jeroen W.T. Carolus
     key = chess.polyglot.zobrist_hash(board)
 
     # Search for position in the transposition table
@@ -42,7 +42,7 @@ def negamax(board, depth, alpha, beta):
 
     # Add position to the transposition table
     if depth == 0 or board.is_game_over():
-        score = -evaluate(board) # TODO why is it negative of the value??
+        score = -evaluate(board)
         
         if score <= alpha: # Score is lowerbound
             ttable[key] = (score, "", "LOWERBOUND", depth)
@@ -89,8 +89,8 @@ def negamax(board, depth, alpha, beta):
 def MTDf(board, depth, guess):
     """
     Searches the possible moves using negamax but zooming in on the window
+    Psuedocode and algorithm from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     """
-    # Psuedocode and algorithm from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     upperbound = INF
     lowerbound = -INF
     best_move = ""
@@ -112,9 +112,7 @@ def cpu_move(board):
     Chooses a move for the CPU
     If inside opening book make book move
     If inside Gaviota tablebase make tablebase move
-    Else compute move
-
-    TODO add endgame book
+    Else search for a move
     """
     global OPENING_BOOK
 
@@ -127,7 +125,7 @@ def cpu_move(board):
         except IndexError:
             OPENING_BOOK = False
 
-    if ENDGAME_BOOK and get_num_pieces(board) <= 5:
+    if ENDGAME_BOOK and get_num_pieces(board) <= 7:
         evals = []
         for move in list(board.legal_moves):
             board.push(move)
