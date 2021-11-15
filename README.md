@@ -13,7 +13,7 @@ Current features:
 - Material score evaluation
 - Piece-squares table evaluation
 - Tapered evaluation
-- Mobility score
+- Mobility evaluation
 
 11/13/21 v1.4.1
 > Added very basic mobility score evaluation, not sure how much of an effect it has.
