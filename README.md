@@ -16,7 +16,9 @@ Current features:
 - Mobility evaluation
 
 11/18/21 v1.4.1
-> A frustrating week. Tested simplified iterative deepening without time cut-off (whereas it simply iteratively searches depth 1, 2, ..., d) to not much of a noticable difference, if any.
+> A frustrating week.
+> 
+> Tested simplified iterative deepening without time cut-off (whereas it simply iteratively searches depth 1, 2, ..., d) to not much of a noticable difference, if any.
 > 
 > Tested PVS search pseudocode without much success. Will likely stick to the MTD(f) framework.
 > 
