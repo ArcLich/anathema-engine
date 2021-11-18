@@ -24,7 +24,7 @@ Current features:
 > 
 > Tested quiescence search with great pain. Discovered python-chess's is_capture() behavior was different than expected, and search had difficulty detecting actual captures. When that was resolved, discovered that qsearch broke MTD(f), but not negamax, and only on even depths. Do not know why.
 > 
-> Evaluation function can be improved, and search speed as well. But most majorly I can not figure out why MTD(f) occasionally produces very obvious blunders negamax does not on the same positions. It was demostrated that by improving search depth from 4 to 5 on those positions the issue was resolved, so I focused on increasing search speed; but mayhaps a look into the algorithim is better as to solve those blunders while on the same depth. Besides that move ordering heuristics seems to be the only straight-forward way to increase speed now.
+> Evaluation function can be improved, and search speed as well. But most majorly I can not figure out why MTD(f) occasionally produces very obvious blunders negamax does not on the same positions. It was demostrated that by improving search depth from 4 to 5 on those positions the issue was resolved, so I focused on increasing search speed; but mayhaps a look into the algorithim is better as to solve those blunders while on the same depth. Besides that move ordering heuristics seems to be the only straight-forward way to increase speed now. I have heard that python-chess's legal move generation is very slow, even though it seems to use bitboards. Looking to improve that may be another avenue.
 
 11/13/21 v1.4.1
 > Added very basic mobility score evaluation, not sure how much of an effect it has.
