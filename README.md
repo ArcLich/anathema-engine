@@ -18,15 +18,12 @@ Current features:
 - Tapered evaluation
 - Mobility evaluation
 
-11/21/21 v1.5
-> Added null-move pruning. Upgraded to depth 5 with negamax!
-> 
-> MTD(f) still does not compute even after a minute. However, computes instantly at depth 4, but instantly blunders. Strange.
-
 11/21/21 v1.4.2
 > Implemented killer and history heuristics for move ordering, though had to do this with global dictionaries. Not sure how efficient so many "in" operations is.
 > 
-> I've ran into the odd situation where negamax is rougly the same speed at depths 4 and 5; and MTD(f) is extremely fast at depth 4 but extremely slow at depth 5.
+> Added null-move pruning.
+> 
+> MTD(f) now refuses to compute at depth 5, and will constantly blunder on depth 4.
 
 11/18/21 v1.4.1
 > A frustrating week.
