@@ -5,8 +5,8 @@ Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-ches
 
 Current features:
 - Alpha-beta negamax search
-- Move ordering enhancement
-- Killer heuristic
+  - Move ordering enhancement
+  - Killer heuristic
 - History heuristic
 - Transposition table
 - Null-move pruning
