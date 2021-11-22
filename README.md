@@ -7,6 +7,7 @@ Current features:
 - Alpha-beta negamax search
 - Move ordering enhancement
 - Killer heuristic
+- History heuristic
 - Transposition table
 - MTD(f) search
 - Opening book
@@ -17,9 +18,9 @@ Current features:
 - Mobility evaluation
 
 11/21/21 v1.4.2
-> Implemented killer heuristic for move ordering, though had to do this with a global dictionary containing sets. Not sure how efficient so many "in" operations is.
+> Implemented killer and history heuristics for move ordering, though had to do this with global dictionaries. Not sure how efficient so many "in" operations is.
 > 
-> By using negamax, depth 5 is looking more and more realistic.
+> I've ran into the odd situation where negamax is rougly the same speed at depths 4 and 5; and MTD(f) is extremely fast at depth 4 but extremely slow at depth 5.
 
 11/18/21 v1.4.1
 > A frustrating week.
