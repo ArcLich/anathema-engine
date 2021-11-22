@@ -8,6 +8,7 @@ import chess.gaviota
 from evaluate import *
 from util import *
 
+
 def negamax(board, depth, alpha, beta):
     """
     Searches the possible moves using negamax, alpha-beta pruning, and a transposition table
@@ -16,12 +17,13 @@ def negamax(board, depth, alpha, beta):
     TODO
     - legal move generation (bitboards)
     - aspiration search
-    - iterative deepening
     - null move pruning
     - late move reduction
     - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
-    - Quiescence Search
+    - extensions
+    - iterative deepening (doesnt work)
+    - Quiescence Search (doesnt work)
     """
     key = chess.polyglot.zobrist_hash(board)
 
@@ -40,10 +42,10 @@ def negamax(board, depth, alpha, beta):
             if alpha >= beta:
                 return (tt_move, tt_score)
 
-    # Add position to the transposition table
     if depth == 0 or board.is_game_over():
         score = -evaluate(board)
-        
+
+        # Add position to the transposition table
         if score <= alpha: # Score is lowerbound
             ttable[key] = (score, "", "LOWERBOUND", depth)
         elif score >= beta: # Score is upperbound
@@ -58,7 +60,8 @@ def negamax(board, depth, alpha, beta):
         best_move = ""
         best_score = -INF
         moves = list(board.legal_moves)
-        moves.sort(key = lambda move : rate(board, move), reverse = True)
+        moves.sort(key = lambda move : rate(board, depth, move), reverse = True)
+
         for move in moves:
             board.push(move)
             score = -negamax(board, depth - 1, -beta, -alpha)[1]
@@ -67,9 +70,16 @@ def negamax(board, depth, alpha, beta):
             if score > best_score:
                 best_move = move
                 best_score = score
-            if best_score > alpha:
-                alpha = best_score
-            if best_score >= beta:
+
+            alpha = max(alpha, best_score)
+
+            if best_score >= beta: # Beta cut-off
+                # Add killer move to refutation table
+                if depth in rtable:
+                    rtable[depth].add(move)
+                else:
+                    rtable[depth] = {move}
+
                 break
 
         if board.piece_at(best_move.from_square).piece_type == chess.PAWN: # Clear ttable after pawn move
@@ -80,12 +90,12 @@ def negamax(board, depth, alpha, beta):
             ttable[key] = (best_score, best_move, "LOWERBOUND", depth)
         elif best_score >= beta: # Score is upperbound
             ttable[key] = (best_score, best_move, "UPPERBOUND", depth)
-        else: # Sore is exact
+        else: # Score is exact
             ttable[key] = (best_score, best_move, "EXACT", depth)
 
         return (best_move, best_score)
 
-        
+
 def MTDf(board, depth, guess):
     """
     Searches the possible moves using negamax but zooming in on the window
@@ -116,6 +126,8 @@ def cpu_move(board):
     """
     global OPENING_BOOK
 
+    rtable.clear() # Clear refutation table
+
     if OPENING_BOOK:
         try:
             with chess.polyglot.open_reader("Opening Book/Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
@@ -134,4 +146,5 @@ def cpu_move(board):
             evals.append((move, score))
         return max(evals, key = lambda eval : eval[1])[0]
 
-    return MTDf(board, DEPTH, 0)[0]
+    return negamax(board, DEPTH, -INF, INF)[0]
+    # return MTDf(board, DEPTH, 0)[0]
