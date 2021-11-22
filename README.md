@@ -9,6 +9,7 @@ Current features:
 - Killer heuristic
 - History heuristic
 - Transposition table
+- Null-moving pruning
 - MTD(f) search
 - Opening book
 - Gaviota endgame tablebase
@@ -16,6 +17,11 @@ Current features:
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+
+11/21/21 v1.5
+> Added null-move pruning. Upgraded to depth 5 with negamax!
+> 
+> MTD(f) still does not compute even after a minute. However, computes instantly at depth 4, but instantly blunders. Strange.
 
 11/21/21 v1.4.2
 > Implemented killer and history heuristics for move ordering, though had to do this with global dictionaries. Not sure how efficient so many "in" operations is.
