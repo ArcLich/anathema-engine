@@ -6,6 +6,7 @@ Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-ches
 Current features:
 - Alpha-beta negamax search
 - Move ordering enhancement
+- Killer heuristic
 - Transposition table
 - MTD(f) search
 - Opening book
@@ -14,6 +15,11 @@ Current features:
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+
+11/21/21 v1.4.2
+> Implemented killer heuristic for move ordering, though had to do this with a global dictionary containing sets. Not sure how efficient so many "in" operations is.
+> 
+> By using negamax, depth 5 is looking more and more realistic.
 
 11/18/21 v1.4.1
 > A frustrating week.
