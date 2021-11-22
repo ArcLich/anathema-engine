@@ -11,8 +11,8 @@ from util import *
 
 def negamax(board, depth, alpha, beta):
     """
-    Searches the possible moves using negamax, alpha-beta pruning, and a transposition table
-    Psuedocode from Jeroen W.T. Carolus
+    Searches the possible moves using negamax, alpha-beta pruning, null-move pruning, and a transposition table
+    Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
     - legal move generation (bitboards)
@@ -134,6 +134,30 @@ def MTDf(board, depth, guess):
     return (best_move, guess)
 
 
+def aspiration_search(board, depth, prev_value, window):
+    """
+    Searches a small window around the previous value from negamax
+    Psuedocode from Jeroen W.T. Carolus
+    """
+    alpha = prev_value - window
+    beta = prev_value + window
+    move, score = negamax(board, depth, alpha, beta)
+    if score >= beta: # Fail high
+        move, score = negamax(board, depth, score, INF)
+    elif score <= alpha: # Fail low
+        move, score = negamax(board, depth, -INF, score)
+    return (move, score)
+
+
+def iterative_deepening(board, depth, score, step):
+    """
+    Iteratively searches depths until final depth, changing window along the way
+    """
+    for d in range(1, depth + 1):
+        move, score = aspiration_search(board, d, score, step)
+    return (move, score)
+    
+
 def cpu_move(board):
     """
     Chooses a move for the CPU
@@ -164,5 +188,6 @@ def cpu_move(board):
             evals.append((move, score))
         return max(evals, key = lambda eval : eval[1])[0]
 
-    return negamax(board, DEPTH, -INF, INF)[0]
+    # return negamax(board, DEPTH, -INF, INF)[0]
     # return MTDf(board, DEPTH, 0)[0]
+    return iterative_deepening(board, DEPTH, 0, 10)[0]

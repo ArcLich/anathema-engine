@@ -49,7 +49,7 @@ def psqt_eval(board):
     """
     Piece-squares tables with tapered evaluation
     Values from Ronald Friederich's Rofchade engine
-    Tapered eval from Fruit engine
+    Tapered evaluation from Fruit engine
     """
     w_mg_pawn_table = [
         [0,   0,   0,   0,   0,   0,  0,   0],
@@ -389,5 +389,7 @@ def evaluate(board):
     mobility_score = mobility_eval(board)
 
     score = (material_score * material_weight) + (psqt_score * psqt_weight) + (mobility_score * mobility_weight)
+
+    score /= 10
 
     return score
