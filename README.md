@@ -9,7 +9,7 @@ Current features:
 - Killer heuristic
 - History heuristic
 - Transposition table
-- Null-moving pruning
+- Null-move pruning
 - MTD(f) search
 - Opening book
 - Gaviota endgame tablebase
