@@ -5,20 +5,21 @@ Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-ches
 
 Current features:
 - Alpha-beta negamax search
-  - Move ordering enhancement
+  - Null-move pruning
+- Move ordering enhancement
   - Killer heuristic
-- History heuristic
-- Transposition table
-- Null-move pruning
+  - History heuristic
+- Transposition table memory
 - MTD(f) search
 - Aspiration search
 - Iterative deepening
 - Opening book
 - Gaviota endgame tablebase
-- Material score evaluation
-- Piece-squares table evaluation
-- Tapered evaluation
-- Mobility evaluation
+- Board evaluation
+  - Material score evaluation
+  - Piece-squares table evaluation
+  - Tapered evaluation
+  - Mobility evaluation
 
 11/22/21 v1.5
 > Likely going to give up on MTD(f) search, and further experiments with PVS have shown little success. One iteration did run, but all it did was push every single pawn two moves forward.
