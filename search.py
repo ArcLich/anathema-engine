@@ -74,11 +74,18 @@ def negamax(board, depth, alpha, beta):
             alpha = max(alpha, best_score)
 
             if best_score >= beta: # Beta cut-off
-                # Add killer move to refutation table
-                if depth in rtable:
-                    rtable[depth].add(move)
+                if board.is_capture(move):
+                    # Add killer move to refutation table
+                    if depth in rtable:
+                        rtable[depth].add(move)
+                    else:
+                        rtable[depth] = {move}
                 else:
-                    rtable[depth] = {move}
+                    # Add move to history heuristic table
+                    if move in htable:
+                        htable[move] += depth**2
+                    else:
+                        htable[move] = depth**2
 
                 break
 
@@ -127,6 +134,7 @@ def cpu_move(board):
     global OPENING_BOOK
 
     rtable.clear() # Clear refutation table
+    htable.clear() # Clear history heuristic table
 
     if OPENING_BOOK:
         try:
@@ -146,5 +154,5 @@ def cpu_move(board):
             evals.append((move, score))
         return max(evals, key = lambda eval : eval[1])[0]
 
-    return negamax(board, DEPTH, -INF, INF)[0]
-    # return MTDf(board, DEPTH, 0)[0]
+    # return negamax(board, DEPTH, -INF, INF)[0]
+    return MTDf(board, DEPTH, 0)[0]

@@ -19,6 +19,7 @@ INF = float("inf")
 # Other
 ttable = {} # Transposition table
 rtable = {} # Refutation table
+htable = {} # History heuristic table
 
 
 def display(board):
@@ -44,15 +45,12 @@ def rate(board, depth, move):
     - Promotions / Equal captures (piece captured and capturing have the same value) | score = 0
     - Killer moves | score = -5
     - Losing captures (high value piece captures low value piece) | -50 <= score <= -10
-    - All others | score = -INF
+    - All others sorted by history heuristic | score ~ -99999
 
     Values are arbitrary, and only useful when comparing whether
     one is higher or lower than the other
-
-    TODO
-    History heuristic
     """
-    if depth in rtable:
+    if depth in rtable: # Killer heuristic
         if move in rtable[depth]:
             return -5
 
@@ -65,7 +63,10 @@ def rate(board, depth, move):
     if move.promotion:
         return 0
 
-    return -INF
+    if move in htable: # History heuristic sorting
+        return -99999 + htable[move]
+
+    return -99999
 
 
 def get_num_pieces(board):
