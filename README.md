@@ -11,12 +11,19 @@ Current features:
 - Transposition table
 - Null-move pruning
 - MTD(f) search
+- Aspiration search
+- Iterative deepening
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+
+11/22/21 v1.5
+> Likely going to give up on MTD(f) search, and further experiments with PVS have shown little success. One iteration did run, but all it did was push every single pawn two moves forward.
+> 
+> In lieu of this, I tried out aspiration search with an iterative deepening step instead, and success has been decent so far. Extensive testing still needs to be done, espically with the details in the iterative deepeing method and the best step size, but initial impressions shows decent speeds at depth 5 and solid move choices.
 
 11/21/21 v1.4.2
 > Implemented killer and history heuristics for move ordering, though had to do this with global dictionaries. Not sure how efficient so many "in" operations is.
