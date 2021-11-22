@@ -16,12 +16,10 @@ def negamax(board, depth, alpha, beta):
 
     TODO
     - legal move generation (bitboards)
-    - aspiration search
     - late move reduction
     - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
     - extensions
-    - iterative deepening (doesnt work)
     - Quiescence Search (doesnt work)
     """
     key = chess.polyglot.zobrist_hash(board)
