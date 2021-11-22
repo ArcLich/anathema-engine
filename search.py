@@ -17,7 +17,6 @@ def negamax(board, depth, alpha, beta):
     TODO
     - legal move generation (bitboards)
     - aspiration search
-    - null move pruning
     - late move reduction
     - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
@@ -55,6 +54,17 @@ def negamax(board, depth, alpha, beta):
 
         return ("", score)
     else:
+        # Null-move pruning
+        R = 2 # Depth reduction factor
+        if is_null_ok(board) and depth > R:
+            board.push(chess.Move.null())
+            move, score = negamax(board, depth - 1 - R, -beta, -beta + 1)
+            score *= -1
+            if score >= beta:
+                board.pop()
+                return (move, score);
+            board.pop()
+
         # Alpha-beta negamax
         score = 0
         best_move = ""
@@ -154,5 +164,5 @@ def cpu_move(board):
             evals.append((move, score))
         return max(evals, key = lambda eval : eval[1])[0]
 
-    # return negamax(board, DEPTH, -INF, INF)[0]
-    return MTDf(board, DEPTH, 0)[0]
+    return negamax(board, DEPTH, -INF, INF)[0]
+    # return MTDf(board, DEPTH, 0)[0]
