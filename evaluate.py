@@ -35,12 +35,12 @@ def material_eval(board):
     king_value = 99999
 
     material_score = 0
-    material_score += (len(board.pieces(chess.PAWN, not board.turn)) - len(board.pieces(chess.PAWN, board.turn))) * pawn_value
-    material_score += (len(board.pieces(chess.KNIGHT, not board.turn)) - len(board.pieces(chess.KNIGHT, board.turn))) * knight_value
-    material_score += (len(board.pieces(chess.BISHOP, not board.turn)) - len(board.pieces(chess.BISHOP, board.turn))) * bishop_value
-    material_score += (len(board.pieces(chess.ROOK, not board.turn)) - len(board.pieces(chess.ROOK, board.turn))) * rook_value
-    material_score += (len(board.pieces(chess.QUEEN, not board.turn)) - len(board.pieces(chess.QUEEN, board.turn))) * queen_value
-    material_score += (len(board.pieces(chess.KING, not board.turn)) - len(board.pieces(chess.KING, board.turn))) * king_value
+    material_score += (len(board.pieces(chess.PAWN, board.turn)) - len(board.pieces(chess.PAWN, not board.turn))) * pawn_value
+    material_score += (len(board.pieces(chess.KNIGHT, board.turn)) - len(board.pieces(chess.KNIGHT, not board.turn))) * knight_value
+    material_score += (len(board.pieces(chess.BISHOP, board.turn)) - len(board.pieces(chess.BISHOP, not board.turn))) * bishop_value
+    material_score += (len(board.pieces(chess.ROOK, board.turn)) - len(board.pieces(chess.ROOK, not board.turn))) * rook_value
+    material_score += (len(board.pieces(chess.QUEEN, board.turn)) - len(board.pieces(chess.QUEEN, not board.turn))) * queen_value
+    material_score += (len(board.pieces(chess.KING, board.turn)) - len(board.pieces(chess.KING, not board.turn))) * king_value
 
     return material_score
 
@@ -301,7 +301,7 @@ def psqt_eval(board):
     pieces_dict = board.piece_map()
     for pos in pieces_dict: #TODO could probably be optimized, at least with numpy to make the lists more efficient. Bitboards seem better though
         piece = pieces_dict[pos]
-        if piece.color != board.turn:
+        if piece.color == board.turn:
             value = 1
         else:
             value = -1
@@ -322,12 +322,10 @@ def mobility_eval(board):
     moves = list(board.legal_moves)
     mobility_score = 0
     for move in moves:
-        if board.piece_at(move.from_square).color == chess.WHITE:
+        if board.piece_at(move.from_square).color == board.turn:
             mobility_score += 1
         else:
             mobility_score -= 1
-    if board.turn == chess.BLACK:
-        mobility_score *= -1
     
     return mobility_score
 
@@ -343,9 +341,6 @@ def evaluate(board):
     - Tapered evaluation
     - Mobility
     - 5-men (7 pieces counting kings) Gaviota endgame tablebase (if toggled)
-
-    NOTES: function looks at a board after the cpu has made a proposed move, so board.turn is reversed:
-           returns BLACK if WHITE to play, and WHITE if BLACK to play
 
     TODO
     - fine tune weights
@@ -390,6 +385,6 @@ def evaluate(board):
 
     score = (material_score * material_weight) + (psqt_score * psqt_weight) + (mobility_score * mobility_weight)
 
-    score /= 10
+    score = round(score / 10, 4)
 
     return score

@@ -9,7 +9,7 @@ import IPython.display
 
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
-DEPTH = 5 # Search depth, minimum 1
+DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
 
@@ -18,8 +18,6 @@ INF = float("inf")
 
 # Other
 ttable = {} # Transposition table
-rtable = {} # Refutation table
-htable = {} # History heuristic table
 
 
 def display(board):
@@ -43,17 +41,11 @@ def rate(board, depth, move):
     Rates a move in relation to the following order for move ordering:
     - Winning captures (low value piece captures high value piece) | 10 <= score <= 50
     - Promotions / Equal captures (piece captured and capturing have the same value) | score = 0
-    - Killer moves | score = -5
     - Losing captures (high value piece captures low value piece) | -50 <= score <= -10
-    - All others sorted by history heuristic | score ~ -99999
 
     Values are arbitrary, and only useful when comparing whether
     one is higher or lower than the other
     """
-    if depth in rtable: # Killer heuristic
-        if move in rtable[depth]:
-            return -5
-
     if board.is_capture(move):
         if board.is_en_passant(move):
             return 0
@@ -62,9 +54,6 @@ def rate(board, depth, move):
 
     if move.promotion:
         return 0
-
-    if move in htable: # History heuristic sorting
-        return -99999 + htable[move]
 
     return -99999
 
@@ -103,20 +92,4 @@ def get_phase(board):
     phase = (phase * 256 + (total_phase / 2)) / total_phase;
 
     return phase
-
-
-def is_null_ok(board):
-    """
-    Checks if null-move pruning can be done. False if:
-    - the side to move is in check
-    - it is the endgame
-
-    TODO
-    endgame threshold value is from very light testing, needs to be refined
-    """
-    endgame_threshold = 100
-    if board.is_check() or get_phase(board) > endgame_threshold:
-        return False
-
-    return True
     
