@@ -15,6 +15,9 @@ Current features:
 - Tapered evaluation
 - Mobility evaluation
 
+12/16/21 v1.5.2
+> Small tweaks in details of some code. I've narrowed down the issue regarding MTD(f) to a couple of factors: even depths seem to give wonky results, initial guess *affects* end result. Reading the paper on MTD(f) I was under the impression that the initial guess only affects the speed at which you get to the end result, but not the end result itself. Unsure if the algorithim is designed this way or some part of implementation is incorrect (more than likely in my negamax, as the MTD(f) pseudocode is too simple to mess up).
+
 11/28/21 v1.5.1
 > Did some experimentation with NegaC* search, no success. Efforts on aspiration search have fell flat, but did discover that MTD(f) was acting funky because of my implementation of killer heuristic, history heurisitc, and null-move pruning. The search works fine after removing those, so this version is technically a reversion to v1.4 then. Lesson learned on not fully testing everything.
 
