@@ -16,7 +16,7 @@ Current features:
 - Mobility evaluation
 
 11/28/21 v1.5.1
-> Did some experimentation with NegaC* search, no success. Efforts on aspiration search have fell flat, but did discover that MTD(f) was acting funky because of my implementation of killer heuristic, history heurisitc, and null-move pruning. The search works fine after that, so this version is technically a reversion to v1.4 then. Lesson learned on not fully testing everything.
+> Did some experimentation with NegaC* search, no success. Efforts on aspiration search have fell flat, but did discover that MTD(f) was acting funky because of my implementation of killer heuristic, history heurisitc, and null-move pruning. The search works fine after removing those, so this version is technically a reversion to v1.4 then. Lesson learned on not fully testing everything.
 
 11/22/21 v1.5
 > Likely going to give up on MTD(f) search, and further experiments with PVS have shown little success. One iteration did run, but all it did was push every single pawn two moves forward.
