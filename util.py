@@ -36,21 +36,29 @@ def display(board):
     IPython.display.display(chess.svg.board(board, orientation = orientation, lastmove = lastmove, size = 350))
 
 
-def rate(board, depth, move):
+def rate(board, move):
     """
     Rates a move in relation to the following order for move ordering:
-    - Winning captures (low value piece captures high value piece) | 10 <= score <= 50
+    - Winning captures (low value piece captures high value piece) | 1 <= score <= 5
     - Promotions / Equal captures (piece captured and capturing have the same value) | score = 0
-    - Losing captures (high value piece captures low value piece) | -50 <= score <= -10
+    - Losing captures (high value piece captures low value piece) | -5 <= score <= -1
+
+    Pieces have the following values:
+    - Pawn: 1
+    - Knight: 2
+    - Bishop: 3
+    - Rook: 4
+    - Queen: 5
+    - King: 6
 
     Values are arbitrary, and only useful when comparing whether
     one is higher or lower than the other
     """
     if board.is_capture(move):
         if board.is_en_passant(move):
-            return 0
+            return 0 # pawn value (1) - pawn value (1) = 0
         else:
-            return 10 * (board.piece_at(move.to_square).piece_type - board.piece_at(move.from_square).piece_type)
+            return board.piece_at(move.to_square).piece_type - board.piece_at(move.from_square).piece_type
 
     if move.promotion:
         return 0

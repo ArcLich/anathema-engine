@@ -63,7 +63,7 @@ def negamax(board, depth, alpha, beta):
         best_move = ""
         best_score = -INF
         moves = list(board.legal_moves)
-        moves.sort(key = lambda move : rate(board, depth, move), reverse = True)
+        moves.sort(key = lambda move : rate(board, move), reverse = True)
 
         for move in moves:
             board.push(move)
