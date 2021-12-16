@@ -22,9 +22,9 @@ def negamax(board, depth, alpha, beta):
     - late move reduction
     - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
-    - negaC*?
     - extensions
     - iterative deepening
+    -- could id negamax by itself?
     - aspiration search?
     - Quiescence Search (doesnt work)
     """
@@ -76,7 +76,7 @@ def negamax(board, depth, alpha, beta):
 
             alpha = max(alpha, best_score)
 
-            if alpha >= beta: # Beta cut-off
+            if best_score >= beta: # Beta cut-off
                 break
 
         if board.piece_at(best_move.from_square).piece_type == chess.PAWN: # Clear ttable after pawn move
@@ -114,6 +114,18 @@ def MTDf(board, depth, guess):
             lowerbound = guess
 
     return (move, guess)
+
+
+def iterative_deepening(board, depth):
+    """
+    Approaches the desired depth in steps for purposes of
+    transposition and guesses for MTD(f), being overall
+    more effective than searching at the desired depth immediately
+    """
+    guess = 0
+    for d in range(1, depth + 1):
+        move, guess = MTDf(board, d, guess)
+    return (move, guess)
     
 
 def cpu_move(board):
@@ -144,4 +156,5 @@ def cpu_move(board):
         return max(evals, key = lambda eval : eval[1])[0]
 
     # return negamax(board, DEPTH, -INF, INF)[0]
-    return MTDf(board, DEPTH, 0)[0]
+    # return MTDf(board, DEPTH, 0)[0]
+    return iterative_deepening(board, DEPTH)[0]

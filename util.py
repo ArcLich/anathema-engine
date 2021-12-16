@@ -8,7 +8,7 @@ import IPython.display
 
 
 # Options
-START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
+START_AS = "BLACK" # Human player plays as: WHITE, BLACK, or RANDOM
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
