@@ -60,7 +60,7 @@ def negamax(board, depth, alpha, beta):
         # Alpha-beta negamax
         score = 0
         best_move = ""
-        best_score = -MATE_SCORE
+        best_score = -INF
         moves = list(board.legal_moves)
         moves.sort(key = lambda move : rate(board, move), reverse = True)
 
@@ -77,9 +77,6 @@ def negamax(board, depth, alpha, beta):
 
             if alpha >= beta: # Beta cut-off
                 break
-
-        if board.piece_at(best_move.from_square).piece_type == chess.PAWN: # Clear ttable after pawn move
-            ttable.clear()
         
         # # Add position to the transposition table
         if abs(alpha - beta) > 1: # Stops null window searches from being stored
@@ -146,7 +143,7 @@ def cpu_move(board, depth):
         except IndexError:
             OPENING_BOOK = False
 
-    if ENDGAME_BOOK and get_num_pieces(board) <= 7:
+    if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         evals = []
         for move in list(board.legal_moves):
             board.push(move)
