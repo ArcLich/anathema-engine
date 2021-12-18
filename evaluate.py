@@ -8,15 +8,15 @@ from util import *
 
 def eval_endgame(board):
     """
-    Evaluates an endgame position with 7 or less pieces
+    Evaluates an endgame position with 5 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
     """
     with chess.gaviota.open_tablebase("Endgame Book") as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
         if board.is_checkmate():
-            return INF
-        score = tablebase.get_dtm(board) * 99999
+            return float("inf")
+        score = tablebase.get_dtm(board) * MATE_SCORE
         if score == 0:
-            return -INF
+            return -float("inf")
         else:
             return score
 
@@ -32,7 +32,7 @@ def material_eval(board):
     bishop_value = 330
     rook_value = 500
     queen_value = 900
-    king_value = 99999
+    king_value = MATE_SCORE
 
     material_score = 0
     material_score += (len(board.pieces(chess.PAWN, board.turn)) - len(board.pieces(chess.PAWN, not board.turn))) * pawn_value
@@ -340,7 +340,7 @@ def evaluate(board):
     - Piece-squares tables
     - Tapered evaluation
     - Mobility
-    - 5-men (7 pieces counting kings) Gaviota endgame tablebase (if toggled)
+    - 5-men Gaviota endgame tablebase (if toggled)
 
     TODO
     - fine tune weights
@@ -372,7 +372,7 @@ def evaluate(board):
     - BISHOP: penalty depending on how many friendly pawns on the same color square as bishop,
       smaller penalty when bishop is outside pawn chain
     """
-    if ENDGAME_BOOK and get_num_pieces(board) <= 7:
+    if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         eval_endgame(board)
 
     material_weight = 10
@@ -385,6 +385,6 @@ def evaluate(board):
 
     score = (material_score * material_weight) + (psqt_score * psqt_weight) + (mobility_score * mobility_weight)
 
-    score = round(score / 10, 4)
+    score = round(score / 1000, 4)
 
     return score

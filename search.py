@@ -23,8 +23,6 @@ def negamax(board, depth, alpha, beta):
     - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
     - extensions
-    - iterative deepening
-    -- could id negamax by itself?
     - aspiration search?
     - Quiescence Search (doesnt work)
     """
@@ -49,19 +47,20 @@ def negamax(board, depth, alpha, beta):
         score = evaluate(board)
 
         # Add position to the transposition table
-        if score <= alpha: # Score is lowerbound
-            ttable[key] = ("", score, "LOWERBOUND", depth)
-        elif score >= beta: # Score is upperbound
-            ttable[key] = ("", score, "UPPERBOUND", depth)
-        else: # Score is exact
-            ttable[key] = ("", score, "EXACT", depth)
+        if abs(alpha - beta) > 1: # Stops null window searches from being stored
+            if score <= alpha: # Score is lowerbound
+                ttable[key] = ("", score, "LOWERBOUND", depth)
+            elif score >= beta: # Score is upperbound
+                ttable[key] = ("", score, "UPPERBOUND", depth)
+            else: # Score is exact
+                ttable[key] = ("", score, "EXACT", depth)
 
         return ("", score)
     else:
         # Alpha-beta negamax
         score = 0
         best_move = ""
-        best_score = -INF
+        best_score = -MATE_SCORE
         moves = list(board.legal_moves)
         moves.sort(key = lambda move : rate(board, move), reverse = True)
 
@@ -76,19 +75,20 @@ def negamax(board, depth, alpha, beta):
 
             alpha = max(alpha, best_score)
 
-            if best_score >= beta: # Beta cut-off
+            if alpha >= beta: # Beta cut-off
                 break
 
         if board.piece_at(best_move.from_square).piece_type == chess.PAWN: # Clear ttable after pawn move
             ttable.clear()
         
-        # Add position to the transposition table
-        if best_score <= alpha: # Score is lowerbound
-            ttable[key] = (best_move, best_score, "LOWERBOUND", depth)
-        elif best_score >= beta: # Score is upperbound
-            ttable[key] = (best_move, best_score, "UPPERBOUND", depth)
-        else: # Score is exact
-            ttable[key] = (best_move, best_score, "EXACT", depth)
+        # # Add position to the transposition table
+        if abs(alpha - beta) > 1: # Stops null window searches from being stored
+            if best_score <= alpha: # Score is lowerbound
+                ttable[key] = (best_move, best_score, "LOWERBOUND", depth)
+            elif best_score >= beta: # Score is upperbound
+                ttable[key] = (best_move, best_score, "UPPERBOUND", depth)
+            else: # Score is exact
+                ttable[key] = (best_move, best_score, "EXACT", depth)
 
         return (best_move, best_score)
 
@@ -98,8 +98,8 @@ def MTDf(board, depth, guess):
     Searches the possible moves using negamax but zooming in on the window
     Psuedocode and algorithm from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     """
-    upperbound = INF
-    lowerbound = -INF
+    upperbound = MATE_SCORE
+    lowerbound = -MATE_SCORE
     while (lowerbound < upperbound):
         if guess == lowerbound:
             beta = guess + 1
@@ -128,7 +128,7 @@ def iterative_deepening(board, depth):
     return (move, guess)
     
 
-def cpu_move(board):
+def cpu_move(board, depth):
     """
     Chooses a move for the CPU
     If inside opening book make book move
@@ -155,6 +155,6 @@ def cpu_move(board):
             evals.append((move, score))
         return max(evals, key = lambda eval : eval[1])[0]
 
-    # return negamax(board, DEPTH, -INF, INF)[0]
-    # return MTDf(board, DEPTH, 0)[0]
-    return iterative_deepening(board, DEPTH)[0]
+    # return negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    # return MTDf(board, depth, 0)[0]
+    return iterative_deepening(board, depth)[0]

@@ -14,7 +14,7 @@ OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
 
 # Constants
-INF = float("inf")
+MATE_SCORE = 99999
 
 # Other
 ttable = {} # Transposition table
