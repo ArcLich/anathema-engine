@@ -8,12 +8,18 @@ Current features:
 - Move ordering enhancement
 - Transposition table memory
 - MTD(f) search
+- Iterative deepening
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+
+12/18/21 v1.5.3
+> By testing with NegaC*, found out MTD(f), NegaC*, and similar null window algorithims have been buggy because the transposition table has been mistakingly storing null window searches. Engine now runs bug free, with MTD(f) in an iterative deepening framework computing in roughly 14 seconds on depth 4 (on my hardware).
+> 
+> Applied some small tweaks. Now will consistently use a large int constant instead of infinity for computations due to issues with infinity arithimetic, aside from two instances in the Gaviota evaluation function.
 
 12/16/21 v1.5.2
 > Small tweaks in details of some code. I've narrowed down the issue regarding MTD(f) to a couple of factors: even depths seem to give wonky results and that initial guess *affects* end result. Reading the paper on MTD(f) I was under the impression that the initial guess only affects the speed at which you get to the end result, but not the end result itself. Unsure if the algorithim is designed this way or some part of implementation is incorrect (more than likely in my negamax, as the MTD(f) pseudocode is too simple to mess up).
@@ -48,8 +54,6 @@ Current features:
 > Added very basic mobility score evaluation, not sure how much of an effect it has.
 > 
 > Organized evaluation() into separate functions for better modularity.
-> 
-> Fixed a small bug. Gaviota evaluation will now take over at the proper time when there are 7 pieces on the board (5 pieces + 2 kings) instead of 5 pieces on the board.
 > 
 > After some testing, it seems the blunders I've been seeing in games have been caused by the MTD(f) search. Unsure whether this is because I do can not get iterative deepening to work, whether it lacks quiescence search, lack of depth, or some other reasoning. Considering switching over to PVS.
 
