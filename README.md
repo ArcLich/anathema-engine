@@ -17,7 +17,7 @@ Current features:
 - Mobility evaluation
 
 12/18/21 v1.5.3
-> By testing with NegaC*, found out MTD(f), NegaC*, and similar null window algorithims have been buggy because the transposition table has not been coded to store null window searches properly. Temporarily fix by not storing them at all. MTD(f), in an iterative deepening framework, computes in roughly 14 seconds on depth 4 (on my hardware).
+> By testing with NegaC*, found out MTD(f), NegaC*, and similar null window algorithims have been buggy because the transposition table has not been coded to store null window searches properly. Temporary fix by not storing them at all. MTD(f), in an iterative deepening framework, computes in roughly 14 seconds on depth 4 (on my hardware).
 > 
 > Applied some small tweaks. Some places benefit from using a large int constant instead of infinity.
 
