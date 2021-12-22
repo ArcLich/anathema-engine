@@ -19,6 +19,8 @@ Current features:
 12/22/21 v1.6
 > Modified the transposition table to correctly handle null window searches. Depth 4 runs fine. Depth 5 runs in ~15 seconds in active middlegame positions, but struggles in quiet ones.
 > 
+> Move ordering now considers transposition table moves first.
+> 
 > Fixed a small bug in which the algorithim wasn't spotting M1 on depth 4.
 
 12/18/21 v1.5.3
