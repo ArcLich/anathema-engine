@@ -10,7 +10,7 @@ import IPython.display
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
 DEPTH = 4 # Search depth, minimum 1
-OPENING_BOOK = True # Use opening book?
+OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
 
 # Constants
@@ -84,6 +84,9 @@ def get_phase(board):
     Low numbers indicate early game
     High numbers indiciate endgame
     """
+    if board.is_checkmate():
+        return -MATE_SCORE
+
     pawn_phase = 0
     knight_phase = 1
     bishop_phase = 1

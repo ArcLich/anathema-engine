@@ -30,36 +30,21 @@ def negamax(board, depth, alpha, beta):
 
     # Search for position in the transposition table
     if key in ttable:
-        tt_move, tt_score, tt_type, tt_depth = ttable[key]
+        tt_move, tt_lowerbound, tt_upperbound, tt_depth = ttable[key]
         if tt_depth >= depth:
-            if tt_type == "EXACT":
-                return (tt_move, tt_score)
-
-            if tt_type == "LOWERBOUND" and tt_score > alpha: # Update lowerbound alpha
-                alpha = tt_score
-            elif tt_type == "UPPERBOUND" and tt_score < beta: # Update upperbound beta
-                beta = tt_score
-
-            if alpha >= beta:
-                return (tt_move, tt_score)
+            if tt_upperbound <= alpha or tt_lowerbound == tt_upperbound:
+                return (tt_move, tt_upperbound)
+            if tt_lowerbound >= beta:
+                return (tt_move, tt_lowerbound)
 
     if depth == 0 or board.is_game_over():
         score = evaluate(board)
-
-        # Add position to the transposition table
-        if abs(alpha - beta) > 1: # Stops null window searches from being stored
-            if score <= alpha: # Score is lowerbound
-                ttable[key] = ("", score, "LOWERBOUND", depth)
-            elif score >= beta: # Score is upperbound
-                ttable[key] = ("", score, "UPPERBOUND", depth)
-            else: # Score is exact
-                ttable[key] = ("", score, "EXACT", depth)
-
-        return ("", score)
+        ttable[key] = (None, score, score, depth) # Add position to the transposition table
+        return (None, score)
     else:
         # Alpha-beta negamax
         score = 0
-        best_move = ""
+        best_move = None
         best_score = -INF
         moves = list(board.legal_moves)
         moves.sort(key = lambda move : rate(board, move), reverse = True)
@@ -79,20 +64,19 @@ def negamax(board, depth, alpha, beta):
                 break
         
         # # Add position to the transposition table
-        if abs(alpha - beta) > 1: # Stops null window searches from being stored
-            if best_score <= alpha: # Score is lowerbound
-                ttable[key] = (best_move, best_score, "LOWERBOUND", depth)
-            elif best_score >= beta: # Score is upperbound
-                ttable[key] = (best_move, best_score, "UPPERBOUND", depth)
-            else: # Score is exact
-                ttable[key] = (best_move, best_score, "EXACT", depth)
+        if best_score <= alpha:
+            ttable[key] = (best_move, -MATE_SCORE, best_score, depth)
+        if alpha < best_score < beta:
+            ttable[key] = (best_move, best_score, best_score, depth)
+        if best_score >= beta:
+            ttable[key] = (best_move, best_score, MATE_SCORE, depth)
 
         return (best_move, best_score)
 
 
 def MTDf(board, depth, guess):
     """
-    Searches the possible moves using negamax but zooming in on the window
+    Searches the possible moves using negamax by zooming in on the window
     Psuedocode and algorithm from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     """
     upperbound = MATE_SCORE
@@ -113,11 +97,24 @@ def MTDf(board, depth, guess):
     return (move, guess)
 
 
+def negacstar(board, depth, mini, maxi):
+    """
+    Searches the possible moves using negamax by zooming in on the window
+    Pseudocode and algorithm from Jean-Christophe Weill
+    """
+    while (mini < maxi):
+        alpha = (mini + maxi) / 2
+        move, score = negamax(board, depth, alpha, alpha + 1)
+        if score > alpha:
+            mini = score
+        else:
+            maxi = score
+    return (move, score)
+
+
 def iterative_deepening(board, depth):
     """
-    Approaches the desired depth in steps for purposes of
-    transposition and guesses for MTD(f), being overall
-    more effective than searching at the desired depth immediately
+    Approaches the desired depth in steps using MTD(f)
     """
     guess = 0
     for d in range(1, depth + 1):
@@ -154,4 +151,5 @@ def cpu_move(board, depth):
 
     # return negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # return MTDf(board, depth, 0)[0]
-    return iterative_deepening(board, depth)[0]
+    return negacstar(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    # return iterative_deepening(board, depth)[0]
