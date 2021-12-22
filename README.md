@@ -4,11 +4,11 @@ WIP classical chess engine.
 Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/) and the [Gaviota endgame tablebase](https://chess.cygnitec.com/tablebases/gaviota/). To run, download and save as `Opening Book/Book.bin` and `Endgame Book/...` (all .cp4 files in one folder), or turn off book usage by setting `OPENING_BOOK`/`ENDGAME_BOOK` to `False` in `util.py`.
 
 Current features:
-- Alpha-beta negamax search
+- Fail soft alpha-beta negamax search
 - Move ordering enhancement
 - Transposition table memory
-- MTD(f) search
-- Iterative deepening
+- MTD(f) search (in an iterative deepening framework)
+- NegaC* search
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
@@ -16,8 +16,13 @@ Current features:
 - Tapered evaluation
 - Mobility evaluation
 
+12/22/21 v1.6
+> Modified the transposition table to correctly handle null window searches. Depth 4 runs fine. Depth 5 runs in ~15 seconds in active middlegame positions, but struggles in quiet ones.
+> 
+> Fixed a small bug in which the algorithim wasn't spotting M1 on depth 4.
+
 12/18/21 v1.5.3
-> By testing with NegaC*, found out MTD(f), NegaC*, and similar null window algorithims have been buggy because the transposition table has not been coded to store null window searches properly. Temporary fix by not storing them at all. MTD(f), in an iterative deepening framework, computes in roughly 14 seconds on depth 4 (on my hardware).
+> By testing with NegaC*, found out MTD(f), NegaC*, and similar null window algorithims have been buggy because the transposition table has not been coded to store null window searches properly. Temporary fix by not storing them at all.
 > 
 > Applied some small tweaks. Some places benefit from using a large int constant instead of infinity.
 
