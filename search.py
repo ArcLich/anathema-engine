@@ -27,6 +27,7 @@ def negamax(board, depth, alpha, beta):
     - Quiescence Search (doesnt work)
     """
     key = chess.polyglot.zobrist_hash(board)
+    tt_move = None
 
     # Search for position in the transposition table
     if key in ttable:
@@ -47,7 +48,7 @@ def negamax(board, depth, alpha, beta):
         best_move = None
         best_score = -INF
         moves = list(board.legal_moves)
-        moves.sort(key = lambda move : rate(board, move), reverse = True)
+        moves.sort(key = lambda move : rate(board, move, tt_move), reverse = True)
 
         for move in moves:
             board.push(move)
