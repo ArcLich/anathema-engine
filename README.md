@@ -21,7 +21,7 @@ Current features:
 > 
 > Move ordering now considers transposition table moves first.
 > 
-> Fixed a small bug in which the algorithim wasn't spotting M1 on depth 4.
+> Fixed a small bug in which the algorithim wasn't spotting M1 on and only on depth 4.
 
 12/18/21 v1.5.3
 > By testing with NegaC*, found out MTD(f), NegaC*, and similar null window algorithims have been buggy because the transposition table has not been coded to store null window searches properly. Temporary fix by not storing them at all.
