@@ -109,4 +109,12 @@ def get_phase(board):
     phase = (phase * 256 + (total_phase / 2)) / total_phase;
 
     return phase
+
+
+def set_ttable(board, move):
+    """
+    Clear the transposition table after an irreversible move (pawn moves, captures, etc)
+    """
+    if board.is_irreversible(move):
+        ttable.clear()
     

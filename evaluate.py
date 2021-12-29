@@ -284,7 +284,7 @@ def psqt_eval(board):
     phase = get_phase(board)
     psqt_score = 0
     pieces_dict = board.piece_map()
-    for pos in pieces_dict: #TODO could probably be optimized, at least with numpy to make the lists more efficient. Bitboards seem better though
+    for pos in pieces_dict: #TODO could probably be optimized
         piece = pieces_dict[pos]
         if piece.color == board.turn:
             value = 1
@@ -333,7 +333,8 @@ def eval_endgame(board):
 def evaluate(board):
     """
     Evaluates a board state, returns value. Higher value
-    means more advantage for the current player
+    means more advantage for the current player,
+    not more advantage for white
 
     Utilizes:
     - Material score
@@ -347,7 +348,7 @@ def evaluate(board):
     - pawn structure
     - king safety
     - Texel's tuning method
-    - king tropism
+    - king pawn tropism
     - center control?
 
     gives bonus to:

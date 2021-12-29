@@ -9,29 +9,51 @@ from evaluate import *
 from util import *
 
 
+def qsearch(board, alpha, beta):
+    """
+    Quiescence search to extend search depth until there are no more captures
+    """
+    stand_pat = evaluate(board)
+    if stand_pat >= beta:
+        return beta
+    alpha = max(alpha, stand_pat)
+
+    moves = list(board.legal_moves)
+    moves.sort(key = lambda move : rate(board, move, None), reverse = True)
+    for move in moves:
+        if board.is_capture(move):
+            board.push(move)
+            score = -qsearch(board, -beta, -alpha)
+            board.pop()
+
+            if score >= beta:
+                return beta
+            alpha = max(alpha, score)
+    return alpha
+
+
 def negamax(board, depth, alpha, beta):
     """
-    Searches the possible moves using negamax, alpha-beta pruning, null-move pruning, and a transposition table
+    Searches the possible moves using negamax, alpha-beta pruning, transposition table, and quiescence search
     Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
     - killer heuristic
     - null move pruning
     - history heuristic
-    - legal move generation (bitboards)
+    - legal move generation (bitboards?)
     - late move reduction
     - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
     - extensions
     - aspiration search?
-    - Quiescence Search (doesnt work)
     """
     key = chess.polyglot.zobrist_hash(board)
     tt_move = None
 
     # Search for position in the transposition table
     if key in ttable:
-        tt_move, tt_lowerbound, tt_upperbound, tt_depth = ttable[key]
+        tt_depth, tt_move, tt_lowerbound, tt_upperbound = ttable[key]
         if tt_depth >= depth:
             if tt_upperbound <= alpha or tt_lowerbound == tt_upperbound:
                 return (tt_move, tt_upperbound)
@@ -39,8 +61,8 @@ def negamax(board, depth, alpha, beta):
                 return (tt_move, tt_lowerbound)
 
     if depth == 0 or board.is_game_over():
-        score = evaluate(board)
-        ttable[key] = (None, score, score, depth) # Add position to the transposition table
+        score = qsearch(board, alpha, beta)
+        ttable[key] = (depth, None, score, score) # Add position to the transposition table
         return (None, score)
     else:
         # Alpha-beta negamax
@@ -66,11 +88,11 @@ def negamax(board, depth, alpha, beta):
         
         # # Add position to the transposition table
         if best_score <= alpha:
-            ttable[key] = (best_move, -MATE_SCORE, best_score, depth)
+            ttable[key] = (depth, best_move, -MATE_SCORE, best_score)
         if alpha < best_score < beta:
-            ttable[key] = (best_move, best_score, best_score, depth)
+            ttable[key] = (depth, best_move, best_score, best_score)
         if best_score >= beta:
-            ttable[key] = (best_move, best_score, MATE_SCORE, depth)
+            ttable[key] = (depth, best_move, best_score, MATE_SCORE)
 
         return (best_move, best_score)
 
@@ -78,7 +100,7 @@ def negamax(board, depth, alpha, beta):
 def MTDf(board, depth, guess):
     """
     Searches the possible moves using negamax by zooming in on the window
-    Psuedocode and algorithm from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
+    Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     """
     upperbound = MATE_SCORE
     lowerbound = -MATE_SCORE
@@ -101,7 +123,7 @@ def MTDf(board, depth, guess):
 def negacstar(board, depth, mini, maxi):
     """
     Searches the possible moves using negamax by zooming in on the window
-    Pseudocode and algorithm from Jean-Christophe Weill
+    Pseudocode from Jean-Christophe Weill
     """
     while (mini < maxi):
         alpha = (mini + maxi) / 2
@@ -137,7 +159,7 @@ def cpu_move(board, depth):
             with chess.polyglot.open_reader("Opening Book/Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
                 opening = opening_book.choice(board)
                 opening_book.close()
-                return opening.move
+                move = opening.move
         except IndexError:
             OPENING_BOOK = False
 
@@ -148,9 +170,12 @@ def cpu_move(board, depth):
             score = eval_endgame(board)
             board.pop()
             evals.append((move, score))
-        return max(evals, key = lambda eval : eval[1])[0]
+        move = max(evals, key = lambda eval : eval[1])[0]
 
-    # return negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
-    # return MTDf(board, depth, 0)[0]
-    return negacstar(board, depth, -MATE_SCORE, MATE_SCORE)[0]
-    # return iterative_deepening(board, depth)[0]
+    # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    move = MTDf(board, depth, 0)[0]
+    # move = negacstar(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    # move = iterative_deepening(board, depth)[0]
+
+    set_ttable(board, move)
+    return move
