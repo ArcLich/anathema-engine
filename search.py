@@ -1,6 +1,8 @@
 """
 Not Magnus
 Classical chess engine by Devin Zhang
+
+Search functions which navigate the game tree
 """
 import chess
 import chess.polyglot
@@ -40,14 +42,10 @@ def negamax(board, depth, alpha, beta):
     Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
-    - killer heuristic
     - history heuristic
-    - legal move generation (bitboards?)
     - late move reduction
-    - https://www.chessprogramming.org/Search#Alpha-Beta_Enhancements
     - parallel search
     - extensions
-    - aspiration search?
     """
     key = chess.polyglot.zobrist_hash(board)
     tt_move = None

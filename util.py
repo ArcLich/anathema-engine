@@ -1,6 +1,8 @@
 """
 Not Magnus
 Classical chess engine by Devin Zhang
+
+Helper functions and constants used throughout the program
 """
 import chess
 import chess.svg
@@ -26,7 +28,7 @@ def display(board):
     Clears cell and displays visual board
     """
     IPython.display.clear_output(wait = True)
-    if START_AS == "WHITE":
+    if START_AS == "WHITE" or START_AS == "COMPUTER":
         orientation = chess.WHITE
     else:
         orientation = chess.BLACK

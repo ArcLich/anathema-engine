@@ -1,6 +1,8 @@
 """
 Not Magnus
 Classical chess engine by Devin Zhang
+
+Evaluation functions which score a given position
 """
 import chess
 from util import *
