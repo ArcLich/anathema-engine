@@ -10,6 +10,7 @@ Current features:
 - MTD(f) search (in an iterative deepening framework)
 - NegaC* search
 - Quiescence search
+- Null move pruning
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
@@ -20,7 +21,9 @@ Current features:
 12/29/21 v1.7
 > Implemented quiescence search.
 > 
-> Modified the way the transposition table is cleared.
+> Implemented null move pruning (again!). Significantly speeds up searches.
+> 
+> Modified the way the transposition table is cleared. Believe previous methods have been improperly clearing it too often.
 
 12/22/21 v1.6
 > Modified the transposition table to correctly handle null window searches. Depth 4 runs fine. Depth 5 runs in ~15 seconds in active middlegame positions, but struggles in quiet ones.
