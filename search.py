@@ -24,6 +24,8 @@ def qsearch(board, alpha, beta):
         if board.is_capture(move):
             board.push(move)
             score = -qsearch(board, -beta, -alpha)
+            key = chess.polyglot.zobrist_hash(board)
+            ttable[key] = (0, None, score, score) # Add position to the transposition table
             board.pop()
 
             if score >= beta:
@@ -173,8 +175,8 @@ def cpu_move(board, depth):
         move = max(evals, key = lambda eval : eval[1])[0]
 
     # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
-    move = MTDf(board, depth, 0)[0]
-    # move = negacstar(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    # move = MTDf(board, depth, 0)[0]
+    move = negacstar(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # move = iterative_deepening(board, depth)[0]
 
     set_ttable(board, move)
