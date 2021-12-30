@@ -8,7 +8,7 @@ import IPython.display
 
 
 # Options
-START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM
+START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
@@ -89,9 +89,6 @@ def get_phase(board):
     Low numbers indicate early game
     High numbers indiciate endgame
     """
-    if board.is_checkmate():
-        return -MATE_SCORE
-
     pawn_phase = 0
     knight_phase = 1
     bishop_phase = 1
@@ -117,4 +114,15 @@ def set_ttable(board, move):
     """
     if board.is_irreversible(move):
         ttable.clear()
+
+
+def null_move_ok(board):
+    """
+    Returns true if conditions are met to perform null move pruning
+    Returns false if side to move is in check or it's the endgame (because position is possibly zugzwang)
+    """
+    endgame_threshold = 100
+    if board.is_check() or get_phase(board) >= endgame_threshold:
+        return False
+    return True
     

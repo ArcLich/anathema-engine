@@ -41,7 +41,6 @@ def negamax(board, depth, alpha, beta):
 
     TODO
     - killer heuristic
-    - null move pruning
     - history heuristic
     - legal move generation (bitboards?)
     - late move reduction
@@ -62,11 +61,20 @@ def negamax(board, depth, alpha, beta):
             if tt_lowerbound >= beta:
                 return (tt_move, tt_lowerbound)
 
-    if depth == 0 or board.is_game_over():
+    if depth <= 0 or board.is_game_over():
         score = qsearch(board, alpha, beta)
         ttable[key] = (depth, None, score, score) # Add position to the transposition table
         return (None, score)
     else:
+        # Null move pruning
+        if null_move_ok(board):
+            board.push(chess.Move.null())
+            null_move_depth_reduction = 2
+            score = -negamax(board, depth - null_move_depth_reduction - 1, -beta, -beta + 1)[1]
+            board.pop()
+            if score >= beta:
+                return (None, score)
+
         # Alpha-beta negamax
         score = 0
         best_move = None
