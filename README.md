@@ -12,7 +12,6 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 - Move ordering enhancement (with history heuristic)
 - Transposition table memory
 - MTD(f) search (in an iterative deepening framework)
-- NegaC* search
 - Quiescence search
 - Null move pruning
 - Opening book
@@ -26,6 +25,8 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 
 12/30/21 v1.7.1
 > Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
+> 
+> Discovered a bug where engine will break on odd depths.
 
 12/29/21 v1.7
 > Implemented quiescence search.
