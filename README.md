@@ -5,6 +5,8 @@ Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-ches
 
 Search depth and playing color can also be modified in `util.py`. Change player to `"COMPUTER"` for the engine to play against itself. Other less user friendly parameters can be found outside `util.py` in the appriopate places (unfortunately still in the middle of the code).
 
+Special note of appreciation to @jcarolus for his thesis "Alpha-Beta with Sibling Prediction Pruning in Chess" in being an invaluable resource laying out many of the algorithims used in this engine.
+
 ------
 
 ## Current Features
