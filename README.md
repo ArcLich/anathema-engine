@@ -36,7 +36,7 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 > Modified the way the transposition table is cleared. Believe previous methods have been improperly clearing it too often.
 
 12/22/21 v1.6
-> Modified the transposition table to correctly handle null window searches. Program struggles in quiet positions.
+> Modified the transposition table to correctly handle null window searches. Engine struggles in quiet positions.
 > 
 > Move ordering now considers transposition table moves first.
 > 
