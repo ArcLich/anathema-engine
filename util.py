@@ -2,7 +2,7 @@
 Not Magnus
 Classical chess engine by Devin Zhang
 
-Helper functions and constants used throughout the program
+Helper functions, constants, and globals used throughout the program
 """
 import chess
 import chess.svg
@@ -21,6 +21,7 @@ MATE_SCORE = 99999
 
 # Other
 ttable = {} # Transposition table
+htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # History heuristic table [side to move][move from][move to]
 
 
 def display(board):
@@ -42,11 +43,12 @@ def display(board):
 def rate(board, move, tt_move):
     """
     Rates a move in relation to the following order for move ordering:
-    - Refutation move (moves from transpositions) | score = 6
-    - Winning captures (low value piece captures high value piece) | 1 <= score <= 5
+    - Refutation move (moves from transpositions) | score = 600
+    - Winning captures (low value piece captures high value piece) | 100 <= score <= 500
     - Promotions / Equal captures (piece captured and capturing have the same value) | score = 0
-    - Losing captures (high value piece captures low value piece) | -5 <= score <= -1
-    - All others | score = -100
+    - Killer moves (from history heuristic table) | -100 < score < 0
+    - Losing captures (high value piece captures low value piece) | -500 <= score <= -100
+    - All others | score = -1000
 
     Pieces have the following values:
     - Pawn: 1
@@ -56,22 +58,25 @@ def rate(board, move, tt_move):
     - Queen: 5
     - King: 6
 
-    Values are arbitrary, and only useful when comparing whether
-    one is higher or lower than the other
+    Values are arbitrary, and only useful when comparing
+    whether one is higher or lower than the other
     """
     if tt_move:
-        return 6
+        return 600
+
+    if htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] != 0:
+        return htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] / -100
 
     if board.is_capture(move):
         if board.is_en_passant(move):
             return 0 # pawn value (1) - pawn value (1) = 0
         else:
-            return board.piece_at(move.to_square).piece_type - board.piece_at(move.from_square).piece_type
+            return (board.piece_at(move.to_square).piece_type - board.piece_at(move.from_square).piece_type) * 100
 
     if move.promotion:
         return 0
 
-    return -100
+    return -1000
 
 
 def get_num_pieces(board):

@@ -42,7 +42,6 @@ def negamax(board, depth, alpha, beta):
     Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
-    - history heuristic
     - late move reduction
     - parallel search
     - extensions
@@ -91,7 +90,9 @@ def negamax(board, depth, alpha, beta):
 
             alpha = max(alpha, best_score)
 
-            if alpha >= beta: # Beta cut-off
+            if best_score >= beta: # Beta cut-off (fails high)
+                if not board.is_capture(move):
+                    htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] += depth**2 # Update history heuristic table
                 break
         
         # # Add position to the transposition table
@@ -161,6 +162,7 @@ def cpu_move(board, depth):
     Else search for a move
     """
     global OPENING_BOOK
+    global htable
 
     if OPENING_BOOK:
         try:
@@ -186,4 +188,5 @@ def cpu_move(board, depth):
     # move = iterative_deepening(board, depth)[0]
 
     set_ttable(board, move)
+    htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     return move
