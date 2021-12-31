@@ -14,6 +14,7 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 - MTD(f) search (in an iterative deepening framework)
 - Quiescence search
 - Null move pruning
+- Late move reduction
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
@@ -23,7 +24,9 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 
 ------
 
-12/30/21 v1.7.1
+12/30/21 v1.8
+> Added late move reduction. Variables are adjustable, but setting the minimum depth `reduction_threshold` too low will cause issues.
+> 
 > Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
 > 
 > Discovered and fixed a bug where null move pruning will break the engine due to double null move pruning in the null window search following one.
