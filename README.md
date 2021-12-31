@@ -5,7 +5,7 @@ Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-ches
 
 Current features:
 - Fail soft alpha-beta negamax search
-- Move ordering enhancement
+- Move ordering enhancement (with history heuristic)
 - Transposition table memory
 - MTD(f) search (in an iterative deepening framework)
 - NegaC* search
@@ -17,6 +17,9 @@ Current features:
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+
+12/30/21 v1.7.1
+> Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
 
 12/29/21 v1.7
 > Implemented quiescence search.
