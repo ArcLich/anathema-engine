@@ -26,7 +26,7 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 12/30/21 v1.7.1
 > Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
 > 
-> Discovered a bug where engine will break on odd depths.
+> Discovered a bug where engine will break on odd depths. Traced the issue to null move pruning.
 
 12/29/21 v1.7
 > Implemented quiescence search.
