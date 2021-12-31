@@ -10,7 +10,7 @@ import IPython.display
 
 
 # Options
-START_AS = "COMPUTER" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
+START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
@@ -124,4 +124,21 @@ def null_move_ok(board):
     if (board.ply() >= 1 and board.peek() != chess.Move.null()) or board.is_check() or get_phase(board) >= endgame_threshold:
         return False
     return True
+
+
+def reduction_ok(board, move):
+    """
+    Returns true if conditions are met to perform late move reduction
+    Returns false if move:
+    - Is a capture
+    - Is a promotion
+    - Gives check
+    - Is made while in check
+    """
+    result = True
+    board.pop()
+    if board.is_capture(move) or move.promotion or board.gives_check(move) or board.is_check():
+        result = False
+    board.push(move)
+    return result
     

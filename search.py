@@ -38,11 +38,11 @@ def qsearch(board, alpha, beta):
 
 def negamax(board, depth, alpha, beta):
     """
-    Searches the possible moves using negamax, alpha-beta pruning, transposition table, and quiescence search
+    Searches the possible moves using negamax, alpha-beta pruning, transposition table,
+    quiescence search, null move pruning, and late move reduction
     Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
-    - late move reduction
     - parallel search
     - extensions
     """
@@ -79,10 +79,23 @@ def negamax(board, depth, alpha, beta):
         moves = list(board.legal_moves)
         moves.sort(key = lambda move : rate(board, move, tt_move), reverse = True)
 
+        moves_searched = 0
+        failed_high = False
+
         for move in moves:
             board.push(move)
-            score = -negamax(board, depth - 1, -beta, -alpha)[1]
+
+            full_depth_moves_threshold = 4
+            reduction_threshold = 4
+            late_move_depth_reduction = 1
+            if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move): # Late move reduction
+                score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha)[1]
+            else:
+                score = -negamax(board, depth - 1, -beta, -alpha)[1]
+
             board.pop()
+
+            moves_searched += 1
 
             if score > best_score:
                 best_move = move
@@ -91,6 +104,7 @@ def negamax(board, depth, alpha, beta):
             alpha = max(alpha, best_score)
 
             if best_score >= beta: # Beta cut-off (fails high)
+                failed_high = True
                 if not board.is_capture(move):
                     htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] += depth**2 # Update history heuristic table
                 break
@@ -154,7 +168,7 @@ def cpu_move(board, depth):
             with chess.polyglot.open_reader("Opening Book/Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
                 opening = opening_book.choice(board)
                 opening_book.close()
-                move = opening.move
+                return opening.move
         except IndexError:
             OPENING_BOOK = False
 
@@ -166,10 +180,11 @@ def cpu_move(board, depth):
             board.pop()
             evals.append((move, score))
         move = max(evals, key = lambda eval : eval[1])[0]
+        return move
 
     # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
-    move = MTDf(board, depth, 0)[0]
-    # move = iterative_deepening(board, depth)[0]
+    # move = MTDf(board, depth, 0)[0]
+    move = iterative_deepening(board, depth)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
