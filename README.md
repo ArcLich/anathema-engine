@@ -5,6 +5,8 @@ Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-ches
 
 Search depth and playing color can be modified in `util.py`. Change player to `"COMPUTER"` for the engine to play against itself.
 
+------
+
 Current features:
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
@@ -19,6 +21,8 @@ Current features:
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+
+------
 
 12/30/21 v1.7.1
 > Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
