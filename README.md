@@ -7,7 +7,7 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 
 ------
 
-# Current Features
+## Current Features
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
 - Transposition table memory
