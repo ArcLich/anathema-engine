@@ -10,7 +10,7 @@ import IPython.display
 
 
 # Options
-START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
+START_AS = "COMPUTER" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = True # Use endgame book?
@@ -121,7 +121,7 @@ def null_move_ok(board):
     Returns false if side to move is in check or it's the endgame (because position is possibly zugzwang)
     """
     endgame_threshold = 100
-    if board.is_check() or get_phase(board) >= endgame_threshold:
+    if (board.ply() >= 1 and board.peek() != chess.Move.null()) or board.is_check() or get_phase(board) >= endgame_threshold:
         return False
     return True
     
