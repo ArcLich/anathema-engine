@@ -129,21 +129,6 @@ def MTDf(board, depth, guess):
     return (move, guess)
 
 
-def negacstar(board, depth, mini, maxi):
-    """
-    Searches the possible moves using negamax by zooming in on the window
-    Pseudocode from Jean-Christophe Weill
-    """
-    while (mini < maxi):
-        alpha = (mini + maxi) / 2
-        move, score = negamax(board, depth, alpha, alpha + 1)
-        if score > alpha:
-            mini = score
-        else:
-            maxi = score
-    return (move, score)
-
-
 def iterative_deepening(board, depth):
     """
     Approaches the desired depth in steps using MTD(f)
@@ -183,10 +168,10 @@ def cpu_move(board, depth):
         move = max(evals, key = lambda eval : eval[1])[0]
 
     # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
-    # move = MTDf(board, depth, 0)[0]
-    move = negacstar(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    move = MTDf(board, depth, 0)[0]
     # move = iterative_deepening(board, depth)[0]
 
-    set_ttable(board, move)
+    if board.is_irreversible(move): # Reset transposition table
+        ttable.clear()
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     return move

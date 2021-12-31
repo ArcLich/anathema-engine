@@ -115,14 +115,6 @@ def get_phase(board):
     return phase
 
 
-def set_ttable(board, move):
-    """
-    Clear the transposition table after an irreversible move (pawn moves, captures, etc)
-    """
-    if board.is_irreversible(move):
-        ttable.clear()
-
-
 def null_move_ok(board):
     """
     Returns true if conditions are met to perform null move pruning
