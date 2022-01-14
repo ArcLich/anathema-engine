@@ -31,7 +31,7 @@ Special note of appreciation to Jeroen Carolus for his thesis "Alpha-Beta with S
 > 
 > Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
 > 
-> Discovered and fixed a bug where null move pruning will break the engine due to double null move pruning in the null window search following one.
+> Discovered and fixed a bug where null move pruning will break the engine due to the null move search also performing null move pruning.
 
 12/29/21 v1.7
 > Implemented quiescence search.
