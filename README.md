@@ -12,7 +12,7 @@ Special note of appreciation to Jeroen Carolus for his thesis "Alpha-Beta with S
 ## Current Features
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
-- Transposition table memory
+- Lockless transposition table
 - MTD(f) search (in an iterative deepening framework)
 - Quiescence search
 - Null move pruning
@@ -25,6 +25,8 @@ Special note of appreciation to Jeroen Carolus for his thesis "Alpha-Beta with S
 - Mobility evaluation
 
 ------
+1/17/22 v1.8.1
+> Made the transposition table lockless using Robert Hyatt and Timothy Mann's XOR technique in preparation to use it as a shared hash table for the parallel search technique Lazy SMP.
 
 12/30/21 v1.8
 > Added late move reduction. Variables are adjustable, but setting the minimum depth `reduction_threshold` too low will cause issues.
