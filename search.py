@@ -1,6 +1,6 @@
 """
 Not Magnus
-Classical chess engine by Devin Zhang
+Learner classical chess engine by Devin Zhang
 
 Search functions which navigate the game tree
 """
@@ -26,8 +26,12 @@ def qsearch(board, alpha, beta):
         if board.is_capture(move):
             board.push(move)
             score = -qsearch(board, -beta, -alpha)
+            
+            # Add position to the transposition table
             key = chess.polyglot.zobrist_hash(board)
-            ttable[key] = (0, None, score, score) # Add position to the transposition table
+            checksum = key ^ hash((0, None, score, score))
+            ttable[key] = (checksum, 0, None, score, score)
+            
             board.pop()
 
             if score >= beta:
@@ -41,6 +45,7 @@ def negamax(board, depth, alpha, beta):
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
     Initial psuedocode adapated from Jeroen W.T. Carolus
+    Lockless transpositional table procedure (using what I call a "checksum") by Robert Hyatt and Timothy Mann
 
     TODO
     - parallel search
@@ -51,8 +56,8 @@ def negamax(board, depth, alpha, beta):
 
     # Search for position in the transposition table
     if key in ttable:
-        tt_depth, tt_move, tt_lowerbound, tt_upperbound = ttable[key]
-        if tt_depth >= depth:
+        tt_checksum, tt_depth, tt_move, tt_lowerbound, tt_upperbound = ttable[key]
+        if tt_checksum ^ hash((tt_depth, tt_move, tt_lowerbound, tt_upperbound)) == key and tt_depth >= depth:
             if tt_upperbound <= alpha or tt_lowerbound == tt_upperbound:
                 return (tt_move, tt_upperbound)
             if tt_lowerbound >= beta:
@@ -60,7 +65,11 @@ def negamax(board, depth, alpha, beta):
 
     if depth <= 0 or board.is_game_over():
         score = qsearch(board, alpha, beta)
-        ttable[key] = (depth, None, score, score) # Add position to the transposition table
+        
+        # Add position to the transposition table
+        checksum = key ^ hash((depth, None, score, score))
+        ttable[key] = (checksum, depth, None, score, score)
+        
         return (None, score)
     else:
         # Null move pruning
@@ -84,7 +93,7 @@ def negamax(board, depth, alpha, beta):
 
         for move in moves:
             board.push(move)
-
+            
             full_depth_moves_threshold = 4
             reduction_threshold = 4
             late_move_depth_reduction = 1
@@ -109,13 +118,16 @@ def negamax(board, depth, alpha, beta):
                     htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] += depth**2 # Update history heuristic table
                 break
         
-        # # Add position to the transposition table
+        # Add position to the transposition table
         if best_score <= alpha:
-            ttable[key] = (depth, best_move, -MATE_SCORE, best_score)
+            checksum = key ^ hash((depth, best_move, -MATE_SCORE, best_score))
+            ttable[key] = (checksum, depth, best_move, -MATE_SCORE, best_score)
         if alpha < best_score < beta:
-            ttable[key] = (depth, best_move, best_score, best_score)
+            checksum = key ^ hash((depth, best_move, best_score, best_score))
+            ttable[key] = (checksum, depth, best_move, best_score, best_score)
         if best_score >= beta:
-            ttable[key] = (depth, best_move, best_score, MATE_SCORE)
+            checksum = key ^ hash((depth, best_move, best_score, MATE_SCORE))
+            ttable[key] = (checksum, depth, best_move, best_score, MATE_SCORE)
 
         return (best_move, best_score)
 
@@ -161,6 +173,7 @@ def cpu_move(board, depth):
     Else search for a move
     """
     global OPENING_BOOK
+    global ttable
     global htable
 
     if OPENING_BOOK:
@@ -189,4 +202,5 @@ def cpu_move(board, depth):
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
+    
     return move
