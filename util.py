@@ -83,45 +83,16 @@ def get_num_pieces(board):
     """
     Get the number of pieces of all types and color on the board.
     """
-    num = 0
-    for color in chess.COLORS:
-        for piece in chess.PIECE_TYPES:
-            num += (len(board.pieces(piece, color)))
-    return num
-
-
-def get_phase(board):
-    """
-    Gets the game state of the board as a number
-    Low numbers indicate early game
-    High numbers indiciate endgame
-    """
-    pawn_phase = 0
-    knight_phase = 1
-    bishop_phase = 1
-    rook_phase = 2
-    queen_phase = 4
-    total_phase = 16*pawn_phase + 4*knight_phase + 4*bishop_phase + 4*rook_phase + 2*queen_phase
-
-    phase = total_phase
-    phase -= (len(board.pieces(chess.PAWN, chess.WHITE)) + len(board.pieces(chess.PAWN, chess.BLACK))) * pawn_phase
-    phase -= (len(board.pieces(chess.KNIGHT, chess.WHITE)) + len(board.pieces(chess.KNIGHT, chess.BLACK))) * knight_phase
-    phase -= (len(board.pieces(chess.BISHOP, chess.WHITE)) + len(board.pieces(chess.BISHOP, chess.BLACK))) * bishop_phase
-    phase -= (len(board.pieces(chess.ROOK, chess.WHITE)) + len(board.pieces(chess.ROOK, chess.BLACK))) * rook_phase
-    phase -= (len(board.pieces(chess.QUEEN, chess.WHITE)) + len(board.pieces(chess.KNIGHT, chess.BLACK))) * queen_phase
-
-    phase = (phase * 256 + (total_phase / 2)) / total_phase;
-
-    return phase
+    return len(board.piece_map())
 
 
 def null_move_ok(board):
     """
     Returns true if conditions are met to perform null move pruning
-    Returns false if side to move is in check or it's the endgame (because position is possibly zugzwang)
+    Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
     """
-    endgame_threshold = 100
-    if (board.ply() >= 1 and board.peek() != chess.Move.null()) or board.is_check() or get_phase(board) >= endgame_threshold:
+    endgame_threshold = 14
+    if (board.ply() >= 1 and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
         return False
     return True
 

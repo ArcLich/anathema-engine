@@ -4,9 +4,7 @@ Learner classical chess engine by Devin Zhang
 
 Search functions which navigate the game tree
 """
-import chess
 import chess.polyglot
-import chess.gaviota
 from evaluate import *
 from util import *
 
@@ -49,7 +47,6 @@ def negamax(board, depth, alpha, beta):
 
     TODO
     - parallel search
-    - extensions
     """
     key = chess.polyglot.zobrist_hash(board)
     tt_move = None
@@ -94,14 +91,14 @@ def negamax(board, depth, alpha, beta):
         for move in moves:
             board.push(move)
             
+            # Late move reduction
+            late_move_depth_reduction = 0
             full_depth_moves_threshold = 4
             reduction_threshold = 4
-            late_move_depth_reduction = 1
-            if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move): # Late move reduction
-                score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha)[1]
-            else:
-                score = -negamax(board, depth - 1, -beta, -alpha)[1]
+            if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move):
+                late_move_depth_reduction = 1
 
+            score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha)[1]
             board.pop()
 
             moves_searched += 1
@@ -159,12 +156,14 @@ def iterative_deepening(board, depth):
     """
     Approaches the desired depth in steps using MTD(f)
     """
+    global multithreading_result
+
     guess = 0
     for d in range(1, depth + 1):
         move, guess = MTDf(board, d, guess)
     return (move, guess)
     
-
+    
 def cpu_move(board, depth):
     """
     Chooses a move for the CPU
@@ -195,9 +194,9 @@ def cpu_move(board, depth):
         move = max(evals, key = lambda eval : eval[1])[0]
         return move
 
-    # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # move = MTDf(board, depth, 0)[0]
-    move = iterative_deepening(board, depth)[0]
+    # move = iterative_deepening(board, depth)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
