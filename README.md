@@ -25,6 +25,13 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Mobility evaluation
 
 ------
+2/8/22 v1.8.2
+> Temporarily pivoting away from parallel search due to unsuccessful attempts at both multiprocessing and multithreading. Also need to investigate whether Python dictionaries even support lockless implementations, as they seem to be by default thread safe.
+> 
+> Rewrote the evaluation function from the ground-up. Expected speed gains from this, but improvements are minimal. What is odd, however, is that negamax, MTD(f), and iteratively deepening MTD(f) seems to perform at the same speed at depth 4 now.
+> 
+> The changes to evaluation has broken MTD(f), making it play blunders occasionally. Still investigating why.
+
 1/17/22 v1.8.1
 > Made the transposition table lockless using Robert Hyatt and Timothy Mann's XOR technique in preparation to use it as a shared hash table for the parallel search technique Lazy SMP.
 
