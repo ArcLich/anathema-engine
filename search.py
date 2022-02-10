@@ -94,7 +94,7 @@ def negamax(board, depth, alpha, beta):
             # Late move reduction
             late_move_depth_reduction = 0
             full_depth_moves_threshold = 4
-            reduction_threshold = 4
+            reduction_threshold = 5
             if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move):
                 late_move_depth_reduction = 1
 
@@ -156,12 +156,27 @@ def iterative_deepening(board, depth):
     """
     Approaches the desired depth in steps using MTD(f)
     """
-    global multithreading_result
-
     guess = 0
     for d in range(1, depth + 1):
         move, guess = MTDf(board, d, guess)
     return (move, guess)
+
+
+def negacstar(board, depth):
+    """
+    Searches the possible moves using negamax by zooming in on the window in a bisection scheme
+    Pseudocode from Jean-Christophe Weill
+    """
+    upper = MATE_SCORE
+    lower = -MATE_SCORE
+    while lower < upper:
+        alpha = (lower + upper) / 2
+        move, score = negamax(board, depth, alpha, alpha + 1)
+        if score > alpha:
+            lower = score
+        else:
+            upper = score
+    return (move, score)
     
     
 def cpu_move(board, depth):
@@ -181,7 +196,7 @@ def cpu_move(board, depth):
                 opening = opening_book.choice(board)
                 opening_book.close()
                 return opening.move
-        except IndexError:
+        except:
             OPENING_BOOK = False
 
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
@@ -194,9 +209,10 @@ def cpu_move(board, depth):
         move = max(evals, key = lambda eval : eval[1])[0]
         return move
 
-    move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # move = MTDf(board, depth, 0)[0]
     # move = iterative_deepening(board, depth)[0]
+    move = negacstar(board, depth)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
