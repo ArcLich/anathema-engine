@@ -13,7 +13,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
 - Lockless transposition table
-- MTD(f) search (in an iterative deepening framework)
+- NegaC* search
 - Quiescence search
 - Null move pruning
 - Late move reduction
