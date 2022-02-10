@@ -13,7 +13,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
 - Lockless transposition table
-- NegaC* search
+- MTD(f) search (in an iterative deepneing framework)
 - Quiescence search
 - Null move pruning
 - Late move reduction
@@ -25,9 +25,6 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Mobility evaluation
 
 ------
-2/10/22 v1.7.3
-> Decided to go forward with the NegaC* search algorithim instead of MTD(f) from now on due to it being easier to debug.
-
 2/8/22 v1.7.2
 > Temporarily pivoting away from parallel search due to unsuccessful attempts at both multiprocessing and multithreading. Also need to investigate whether Python dictionaries even support lockless implementations, as they seem to be by default thread safe.
 > 
