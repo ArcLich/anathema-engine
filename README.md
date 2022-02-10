@@ -25,34 +25,34 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Mobility evaluation
 
 ------
-2/10/22 v1.8.3
+2/10/22 v1.7.3
 > Decided to go forward with the NegaC* search algorithim instead of MTD(f) from now on due to it being easier to debug.
 
-2/8/22 v1.8.2
+2/8/22 v1.7.2
 > Temporarily pivoting away from parallel search due to unsuccessful attempts at both multiprocessing and multithreading. Also need to investigate whether Python dictionaries even support lockless implementations, as they seem to be by default thread safe.
 > 
 > Rewrote the evaluation function from the ground-up. Expected speed gains from this, but improvements are minimal. What is odd, however, is that negamax, MTD(f), and iteratively deepening MTD(f) seems to perform at the same speed at depth 4 now.
 > 
 > Moved piece-squares tables to a separate file for better readability.
 
-1/17/22 v1.8.1
+1/17/22 v1.7.1
 > Made the transposition table lockless using Robert Hyatt and Timothy Mann's XOR technique in preparation to use it as a shared hash table for the parallel search technique Lazy SMP.
 
-12/30/21 v1.8
+12/30/21 v1.7
 > Added late move reduction. Variables are adjustable, but setting the minimum depth `reduction_threshold` too low will cause issues.
 > 
 > Modified move ordering with history heuristic. Speed increase seems negligible, more testing required.
 > 
 > Discovered and fixed a bug where null move pruning will break the engine due to the null move search also performing null move pruning.
 
-12/29/21 v1.7
+12/29/21 v1.6
 > Implemented quiescence search.
 > 
 > Implemented null move pruning (again!). Significantly speeds up searches.
 > 
 > Modified the way the transposition table is cleared. Believe previous methods have been improperly clearing it too often.
 
-12/22/21 v1.6
+12/22/21 v1.5.4
 > Modified the transposition table to correctly handle null window searches. Engine struggles in quiet positions.
 > 
 > Move ordering now considers transposition table moves first.
@@ -67,15 +67,15 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 12/16/21 v1.5.2
 > Small tweaks in details of some code. I've narrowed down the issue regarding MTD(f) to a couple of factors: even depths seem to give wonky results and that initial guess *affects* end result. Reading the paper on MTD(f) I was under the impression that the initial guess only affects the speed at which you get to the end result, but not the end result itself. Unsure if the algorithim is designed this way or some part of implementation is incorrect (more than likely in my negamax, as the MTD(f) pseudocode is too simple to mess up).
 
-11/28/21 v1.5.1
-> Did some experimentation with NegaC* search, no success. Efforts on aspiration search have fell flat, but did discover that MTD(f) was acting funky because of my implementation of killer heuristic, history heurisitc, and null-move pruning. The search works fine after removing those, so this version is technically a reversion to v1.4 then. Lesson learned on not fully testing everything.
+11/28/21 v1.5.2
+> Did some experimentation with NegaC* search, no success. Efforts on aspiration search have fell flat, but did discover that MTD(f) was acting funky because of my implementation of killer heuristic, history heurisitc, and null-move pruning.
 
-11/22/21 v1.5
+11/22/21 v1.5.1
 > Likely going to give up on MTD(f) search, and further experiments with PVS have shown little success. One iteration did run, but all it did was push every single pawn two moves forward.
 > 
 > In lieu of this, I tried out aspiration search with an iterative deepening step instead, and success has been decent so far. Extensive testing still needs to be done, espically with the details in the iterative deepeing method and the best step size, but initial impressions shows decent speeds at depth 5 and solid move choices.
 
-11/21/21 v1.4.2
+11/21/21 v1.5
 > Implemented killer and history heuristics for move ordering, though had to do this with global dictionaries. Not sure how efficient so many "in" operations is.
 > 
 > Added null-move pruning.
