@@ -23,8 +23,14 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Piece-squares table evaluation
 - Tapered evaluation
 - Mobility evaluation
+- Piece-specific evaluation
 
 ------
+2/10/22 v1.7.3
+> Added an evaluation bonus for rooks on open files and semi-open files.
+> 
+> Switch to Numpy arrays for the piece-squares tables.
+
 2/8/22 v1.7.2
 > Temporarily pivoting away from parallel search due to unsuccessful attempts at both multiprocessing and multithreading. Also need to investigate whether Python dictionaries even support lockless implementations, as they seem to be by default thread safe.
 > 
