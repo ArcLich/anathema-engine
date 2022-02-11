@@ -51,9 +51,7 @@ def evaluate(board):
 
     gives bonus to:
     - batteries
-    - rooks on open file
     - rooks on 7th (and 8th?) rank
-    - rooks on semi-open file
     - passed pawns (the further it is, the higher the bonus)
     - moves that control the center, espically with pawns
     - moves that prevent opponent from castling
@@ -118,37 +116,65 @@ def evaluate(board):
         "Q": 4,
         "K": 0
     }
-    total_phase = 16*phase_scores["P"] + 4*phase_scores["N"] + 4*phase_scores["B"] + 4*phase_scores["R"] + 2*phase_scores["Q"]
 
     material_score = 0
-
     psqt_mg_score = 0
     psqt_eg_score = 0
     phase = 0
+    total_phase = 16*phase_scores["P"] + 4*phase_scores["N"] + 4*phase_scores["B"] + 4*phase_scores["R"] + 2*phase_scores["Q"]
+    piece_specific_score = 0
+
+    # Piece-specific score bonuses
+    rook_open_file_bonus = 100
 
     piece_map = board.piece_map()
-    for square in piece_map.keys():
+
+    # Bitboards
+    # bb_all_pieces = chess.SquareSet(piece_map.keys())
+    bb_w_pawns = board.pieces(chess.PAWN, chess.WHITE)
+    bb_b_pawns = board.pieces(chess.PAWN, chess.BLACK)
+
+    for square in piece_map:
         piece = piece_map[square]
         piece_symbol = piece.symbol()
         piece_raw = piece_symbol.upper()
+
         relative_weight = 1 if piece.color == board.turn else -1
         
+        # Material evaluation
         material_score += material_values[piece_raw] * relative_weight
 
-        psqt_mg_score += mg_psqts[piece_symbol][7 - int(square / 8)][square % 8] * relative_weight
-        psqt_eg_score += eg_psqts[piece_symbol][7 - int(square / 8)][square % 8] * relative_weight
+        # PSQT evaluation part 1
+        psqt_mg_score += mg_psqts[piece_symbol][7 - square // 8][square % 8] * relative_weight
+        psqt_eg_score += eg_psqts[piece_symbol][7 - square // 8][square % 8] * relative_weight
         phase += phase_scores[piece_raw]
 
+        # Piece-specific evaluation
+        if piece_raw == "R": # Rook on open file
+            rook_file = chess.BB_FILES[chess.square_file(square)]
+            bb_rook_file = chess.SquareSet(rook_file)
+            bb_friend_pawns = bb_w_pawns if piece.color == chess.WHITE else bb_b_pawns
+            bb_foe_pawns = bb_b_pawns if piece.color == chess.WHITE else bb_w_pawns
+            if len(bb_rook_file & bb_friend_pawns) == 0:
+                if len(bb_rook_file & bb_foe_pawns) == 0:
+                    piece_specific_score += rook_open_file_bonus * relative_weight
+                else:
+                    piece_specific_score += rook_open_file_bonus / 2 * relative_weight
+
+    # PSQT evaluation part 2
     mg_phase = max(phase, total_phase)
     eg_phase = total_phase - mg_phase
     psqt_score = (psqt_mg_score * mg_phase + psqt_eg_score * eg_phase) / total_phase
 
+    # Mobility evaluation
     mobility_score = len(list(board.legal_moves))
 
+    # Totaling scores
     material_weight = 10
     psqt_weight = 1
     mobility_weight = 1
-    score = (material_weight * material_score) + (psqt_weight * psqt_score) + (mobility_weight * mobility_score)
+    piece_specific_weight = 1
+    score = (material_weight * material_score) + (psqt_weight * psqt_score) + (mobility_weight * mobility_score) + (piece_specific_weight * piece_specific_score)
 
     return score
         

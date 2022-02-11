@@ -13,7 +13,7 @@ import IPython.display
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
-ENDGAME_BOOK = True # Use endgame book?
+ENDGAME_BOOK = False # Use endgame book?
 
 # Constants
 INF = float("inf")

@@ -100,7 +100,6 @@ def negamax(board, depth, alpha, beta):
 
             score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha)[1]
             board.pop()
-
             moves_searched += 1
 
             if score > best_score:
@@ -160,23 +159,6 @@ def iterative_deepening(board, depth):
     for d in range(1, depth + 1):
         move, guess = MTDf(board, d, guess)
     return (move, guess)
-
-
-def negacstar(board, depth):
-    """
-    Searches the possible moves using negamax by zooming in on the window in a bisection scheme
-    Pseudocode from Jean-Christophe Weill
-    """
-    upper = MATE_SCORE
-    lower = -MATE_SCORE
-    while lower < upper:
-        alpha = (lower + upper) / 2
-        move, score = negamax(board, depth, alpha, alpha + 1)
-        if score > alpha:
-            lower = score
-        else:
-            upper = score
-    return (move, score)
     
     
 def cpu_move(board, depth):
@@ -211,8 +193,7 @@ def cpu_move(board, depth):
 
     # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # move = MTDf(board, depth, 0)[0]
-    # move = iterative_deepening(board, depth)[0]
-    move = negacstar(board, depth)[0]
+    move = iterative_deepening(board, depth)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
