@@ -37,7 +37,6 @@ def negamax(board, depth, alpha, beta):
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
     Initial psuedocode adapated from Jeroen W.T. Carolus
-    Lockless transpositional table procedure (using what I call a "checksum") by Robert Hyatt and Timothy Mann
 
     TODO
     - parallel search
@@ -48,8 +47,8 @@ def negamax(board, depth, alpha, beta):
     old_alpha = alpha
     # Search for position in the transposition table
     if key in ttable:
-        tt_key, tt_depth, tt_move, tt_score, flag = ttable[key]
-        if tt_key == key and tt_depth >= depth:
+        tt_depth, tt_move, tt_score, flag = ttable[key]
+        if tt_depth >= depth:
             if flag == "EXACT":
                 alpha = tt_score
             elif flag == "LOWERBOUND":
@@ -61,7 +60,7 @@ def negamax(board, depth, alpha, beta):
 
     if depth <= 0 or board.is_game_over():
         score = qsearch(board, alpha, beta)
-        ttable[key] = (key, depth, None, score, score) # Add position to the transposition table
+        ttable[key] = (depth, None, score, score) # Add position to the transposition table
         return (None, score)
     else:
         # Null move pruning
@@ -111,11 +110,11 @@ def negamax(board, depth, alpha, beta):
         
         # Add position to the transposition table
         if best_score <= old_alpha:
-            ttable[key] = (key, depth, best_move, best_score, "UPPERBOUND")
+            ttable[key] = (depth, best_move, best_score, "UPPERBOUND")
         if alpha < best_score < beta:
-            ttable[key] = (key, depth, best_move, best_score, "EXACT")
+            ttable[key] = (depth, best_move, best_score, "EXACT")
         if best_score >= beta:
-            ttable[key] = (key, depth, best_move, best_score, "LOWERBOUND")
+            ttable[key] = (depth, best_move, best_score, "LOWERBOUND")
 
         return (best_move, best_score)
 
