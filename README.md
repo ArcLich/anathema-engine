@@ -12,7 +12,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 ## Current Features
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
-- Lockless transposition table
+- Transposition table
 - MTD(f) search (in an iterative deepneing framework)
 - Quiescence search
 - Null move pruning
@@ -26,6 +26,9 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Piece-specific evaluation
 
 ------
+2/17/22 v1.7.4
+> Committed Disservin's changes to the transposition table. Slightly modified file to clean up deprecated code, more variable consistency, and moved the timing to the main game loop to display time for computer to crunch out each move.
+
 2/10/22 v1.7.3
 > Added an evaluation bonus for rooks on open files and semi-open files.
 > 
