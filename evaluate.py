@@ -4,7 +4,6 @@ Classical chess engine by Devin Zhang
 
 Evaluation functions which score a given position
 """
-import chess
 import chess.gaviota
 from util import *
 from piece_squares_tables import *
@@ -37,6 +36,9 @@ def evaluate(board):
     - Tapered evaluation
     - Mobility
     - 5-men Gaviota endgame tablebase (if toggled)
+
+    Gives bonuses to:
+    - Rooks on open and semi-open files
 
     Material score values from Tomasz Michniewski's Simplified Evaluation Function
     Piece-squares table values and tapered evaluation from Ronald Friederich's PeSTO's Evaluation Function
@@ -129,11 +131,6 @@ def evaluate(board):
 
     piece_map = board.piece_map()
 
-    # Bitboards
-    # bb_all_pieces = chess.SquareSet(piece_map.keys())
-    bb_w_pawns = board.pieces(chess.PAWN, chess.WHITE)
-    bb_b_pawns = board.pieces(chess.PAWN, chess.BLACK)
-
     for square in piece_map:
         piece = piece_map[square]
         piece_symbol = piece.symbol()
@@ -150,11 +147,13 @@ def evaluate(board):
         phase += phase_scores[piece_raw]
 
         # Piece-specific evaluation
-        if piece_raw == "R": # Rook on open file
+        if piece_raw == "R":
             rook_file = chess.BB_FILES[chess.square_file(square)]
             bb_rook_file = chess.SquareSet(rook_file)
-            bb_friend_pawns = bb_w_pawns if piece.color == chess.WHITE else bb_b_pawns
-            bb_foe_pawns = bb_b_pawns if piece.color == chess.WHITE else bb_w_pawns
+
+            # Rook on open file
+            bb_friend_pawns = board.pieces(chess.PAWN, piece.color)
+            bb_foe_pawns = board.pieces(chess.PAWN, not piece.color)
             if len(bb_rook_file & bb_friend_pawns) == 0:
                 if len(bb_rook_file & bb_foe_pawns) == 0:
                     piece_specific_score += rook_open_file_bonus * relative_weight
@@ -174,7 +173,10 @@ def evaluate(board):
     psqt_weight = 1
     mobility_weight = 1
     piece_specific_weight = 1
-    score = (material_weight * material_score) + (psqt_weight * psqt_score) + (mobility_weight * mobility_score) + (piece_specific_weight * piece_specific_score)
+    score = (material_weight * material_score) \
+            + (psqt_weight * psqt_score) \
+            + (mobility_weight * mobility_score) \
+            + (piece_specific_weight * piece_specific_score)
 
     return score
         

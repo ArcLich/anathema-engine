@@ -1,5 +1,6 @@
 from numpy import array
 
+
 w_mg_pawn_table = array([
     [0,   0,   0,   0,   0,   0,  0,   0],
     [98, 134,  61,  95,  68, 126, 34, -11],
