@@ -7,6 +7,7 @@ Search functions which navigate the game tree
 import chess.polyglot
 from evaluate import *
 from util import *
+import time
 
 
 def qsearch(board, alpha, beta):
@@ -26,9 +27,9 @@ def qsearch(board, alpha, beta):
             score = -qsearch(board, -beta, -alpha)
             
             # Add position to the transposition table
-            key = chess.polyglot.zobrist_hash(board)
-            checksum = key ^ hash((0, None, score, score))
-            ttable[key] = (checksum, 0, None, score, score)
+            # key = chess.polyglot.zobrist_hash(board)
+            # checksum = key ^ hash((0, None, score, score))
+            # ttable[key] = (checksum, 0, None, score, score)
             
             board.pop()
 
@@ -51,20 +52,25 @@ def negamax(board, depth, alpha, beta):
     key = chess.polyglot.zobrist_hash(board)
     tt_move = None
 
+    old_alpha = alpha
     # Search for position in the transposition table
     if key in ttable:
-        tt_checksum, tt_depth, tt_move, tt_lowerbound, tt_upperbound = ttable[key]
-        if tt_checksum ^ hash((tt_depth, tt_move, tt_lowerbound, tt_upperbound)) == key and tt_depth >= depth:
-            if tt_upperbound <= alpha or tt_lowerbound == tt_upperbound:
-                return (tt_move, tt_upperbound)
-            if tt_lowerbound >= beta:
-                return (tt_move, tt_lowerbound)
+        tt_checksum, tt_depth, tt_move, tt_score, flag = ttable[key]
+        if tt_checksum == key and tt_depth >= depth:
+            if flag == "exact":
+                alpha = tt_score
+            elif flag == "lowerbound":
+                alpha = max(alpha, tt_score)
+            elif flag == "upperbound":
+                beta = min(beta, tt_score)
+            if alpha >= beta:
+                return None, tt_score
 
     if depth <= 0 or board.is_game_over():
         score = qsearch(board, alpha, beta)
         
         # Add position to the transposition table
-        checksum = key ^ hash((depth, None, score, score))
+        checksum = key
         ttable[key] = (checksum, depth, None, score, score)
         
         return (None, score)
@@ -115,15 +121,15 @@ def negamax(board, depth, alpha, beta):
                 break
         
         # Add position to the transposition table
-        if best_score <= alpha:
-            checksum = key ^ hash((depth, best_move, -MATE_SCORE, best_score))
-            ttable[key] = (checksum, depth, best_move, -MATE_SCORE, best_score)
+        if best_score <= old_alpha:
+            checksum = key
+            ttable[key] = (checksum, depth, best_move, best_score, "upperbound")
         if alpha < best_score < beta:
-            checksum = key ^ hash((depth, best_move, best_score, best_score))
-            ttable[key] = (checksum, depth, best_move, best_score, best_score)
+            checksum = key 
+            ttable[key] = (checksum, depth, best_move, best_score, "exact")
         if best_score >= beta:
-            checksum = key ^ hash((depth, best_move, best_score, MATE_SCORE))
-            ttable[key] = (checksum, depth, best_move, best_score, MATE_SCORE)
+            checksum = key 
+            ttable[key] = (checksum, depth, best_move, best_score, "lowerbound")
 
         return (best_move, best_score)
 
@@ -157,7 +163,8 @@ def iterative_deepening(board, depth):
     """
     guess = 0
     for d in range(1, depth + 1):
-        move, guess = MTDf(board, d, guess)
+        # move, guess = MTDf(board, d, guess)
+        move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE)
     return (move, guess)
     
     
@@ -200,3 +207,10 @@ def cpu_move(board, depth):
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     
     return move
+
+if __name__ == "__main__":
+    board = chess.Board()
+    start = time.time()
+    print(cpu_move(board,4))
+    print(time.time()-start)
+    
