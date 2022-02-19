@@ -142,8 +142,8 @@ def evaluate(board):
         material_score += material_values[piece_raw] * relative_weight
 
         # PSQT evaluation part 1
-        psqt_mg_score += mg_psqts[piece_symbol][7 - square // 8][square % 8] * relative_weight
-        psqt_eg_score += eg_psqts[piece_symbol][7 - square // 8][square % 8] * relative_weight
+        psqt_mg_score += mg_psqts[piece_symbol][square] * relative_weight
+        psqt_eg_score += eg_psqts[piece_symbol][square] * relative_weight
         phase += phase_scores[piece_raw]
 
         # Piece-specific evaluation

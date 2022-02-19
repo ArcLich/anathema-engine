@@ -41,11 +41,11 @@ def negamax(board, depth, alpha, beta):
     TODO
     - parallel search
     """
-    key = chess.polyglot.zobrist_hash(board)
+    key = chess.polyglot.zobrist_hash(board) #TODO generating new hash every time instead of incrementing is expensive
     tt_move = None
-
     old_alpha = alpha
-    # Search for position in the transposition table
+
+    # # Search for position in the transposition table
     if key in ttable:
         tt_depth, tt_move, tt_score, flag = ttable[key]
         if tt_depth >= depth:
@@ -60,7 +60,15 @@ def negamax(board, depth, alpha, beta):
 
     if depth <= 0 or board.is_game_over():
         score = qsearch(board, alpha, beta)
-        ttable[key] = (depth, None, score, score) # Add position to the transposition table
+
+        # Add position to the transposition table
+        if score <= old_alpha:
+            ttable[key] = (depth, None, score, "UPPERBOUND")
+        if alpha < score < beta:
+            ttable[key] = (depth, None, score, "EXACT")
+        if score >= beta:
+            ttable[key] = (depth, None, score, "LOWERBOUND")
+
         return (None, score)
     else:
         # Null move pruning
