@@ -26,6 +26,9 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Piece-specific evaluation
 
 ------
+2/19/22 v1.7.5
+> Update the piece-squares tables to be one list instead of 8 nested lists. Value indices now reflect the squares they belong to.
+
 2/17/22 v1.7.4
 > Committed Disservin's changes to the transposition table. Slightly modified file to clean up deprecated code, more variable consistency, and moved the timing to the main game loop to display time for computer to crunch out each move.
 
