@@ -9,7 +9,7 @@ from evaluate import *
 from util import *
 
 
-def qsearch(board, alpha, beta):
+def qsearch(board: chess.Board, alpha: int, beta: int) -> int:
     """
     Quiescence search to extend search depth until there are no more captures
     """
@@ -32,7 +32,7 @@ def qsearch(board, alpha, beta):
     return alpha
 
 
-def negamax(board, depth, alpha, beta):
+def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[chess.Move, float]:
     """
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
@@ -127,7 +127,7 @@ def negamax(board, depth, alpha, beta):
         return (best_move, best_score)
 
 
-def MTDf(board, depth, guess):
+def MTDf(board: chess.Board, depth: int, guess: float) -> tuple(chess.Move, float):
     """
     Searches the possible moves using negamax by zooming in on the window
     Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
@@ -150,7 +150,7 @@ def MTDf(board, depth, guess):
     return (move, guess)
 
 
-def iterative_deepening(board, depth):
+def iterative_deepening(board: chess.Board, depth: int) -> tuple(chess.Move, float):
     """
     Approaches the desired depth in steps using MTD(f)
     """
@@ -161,7 +161,7 @@ def iterative_deepening(board, depth):
     return (move, guess)
     
     
-def cpu_move(board, depth):
+def cpu_move(board: chess.Board, depth: int) -> chess.Move:
     """
     Chooses a move for the CPU
     If inside opening book make book move
@@ -197,7 +197,7 @@ def cpu_move(board, depth):
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
-    htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
+    htable = array([[[0 for x in range(64)] for y in range(64)] for z in range(2)]) # Reset history heuristic table
     
     return move
     
