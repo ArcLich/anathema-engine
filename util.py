@@ -112,4 +112,14 @@ def reduction_ok(board, move):
         result = False
     board.push(move)
     return result
-    
+
+
+def get_square_color(square):
+    """
+    Given a square on the board return whether
+    its a dark square or a light square
+    """
+    if (square % 8) % 2 == (square // 8) % 2:
+        return chess.BLACK
+    else:
+        return chess.WHITE

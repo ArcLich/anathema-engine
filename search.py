@@ -58,16 +58,16 @@ def negamax(board, depth, alpha, beta):
             if alpha >= beta:
                 return (None, tt_score)
 
-    if depth <= 0 or board.is_game_over():
+    if depth <= 0 or board.is_game_over(claim_draw = True): # TODO optimize draw by repition detection, tt draw result
         score = qsearch(board, alpha, beta)
 
         # Add position to the transposition table
         if score <= old_alpha:
             ttable[key] = (depth, None, score, "UPPERBOUND")
-        if alpha < score < beta:
-            ttable[key] = (depth, None, score, "EXACT")
-        if score >= beta:
+        elif score >= beta:
             ttable[key] = (depth, None, score, "LOWERBOUND")
+        else:
+            ttable[key] = (depth, None, score, "EXACT")
 
         return (None, score)
     else:
@@ -119,10 +119,10 @@ def negamax(board, depth, alpha, beta):
         # Add position to the transposition table
         if best_score <= old_alpha:
             ttable[key] = (depth, best_move, best_score, "UPPERBOUND")
-        if alpha < best_score < beta:
-            ttable[key] = (depth, best_move, best_score, "EXACT")
-        if best_score >= beta:
+        elif best_score >= beta:
             ttable[key] = (depth, best_move, best_score, "LOWERBOUND")
+        else:
+            ttable[key] = (depth, best_move, best_score, "EXACT")
 
         return (best_move, best_score)
 
@@ -191,9 +191,9 @@ def cpu_move(board, depth):
         move = max(evals, key = lambda eval : eval[1])[0]
         return move
 
-    # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # move = MTDf(board, depth, 0)[0]
-    move = iterative_deepening(board, depth)[0]
+    # move = iterative_deepening(board, depth)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
