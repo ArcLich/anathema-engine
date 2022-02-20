@@ -26,6 +26,13 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Piece-specific evaluation
 
 ------
+2/20/22 v1.8
+> Rewrote the evaluation function again with the innovation of bitboards.
+> 
+> Implemented bonuses for passed pawns and knights on outpost squares.
+> 
+> Implemented penalties for pinned queens, pawns being on the same colored square as the friendly bishops, and isolated pawns.
+
 2/19/22 v1.7.5
 > Update the piece-squares tables to be one list instead of 8 nested lists. Value indices now reflect the squares they belong to.
 
