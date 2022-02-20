@@ -14,6 +14,9 @@ START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTE
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = False # Use endgame book?
+OPENING_BOOK_LOCATION = "Opening Book/Book.bin"
+ENDGAME_BOOK_LOCATION = "Endgame Book"
+
 
 # Constants
 INF = float("inf")

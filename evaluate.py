@@ -14,7 +14,7 @@ def eval_endgame(board):
     Evaluates an endgame position with 5 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
     """
-    with chess.gaviota.open_tablebase("Endgame Book") as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
+    with chess.gaviota.open_tablebase(ENDGAME_BOOK_LOCATION) as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
         if board.is_checkmate():
             return INF
         score = tablebase.get_dtm(board) * MATE_SCORE

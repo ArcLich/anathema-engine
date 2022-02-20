@@ -174,7 +174,7 @@ def cpu_move(board, depth):
 
     if OPENING_BOOK:
         try:
-            with chess.polyglot.open_reader("Opening Book/Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
+            with chess.polyglot.open_reader(OPENING_BOOK_LOCATION) as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
                 opening = opening_book.choice(board)
                 opening_book.close()
                 return opening.move
