@@ -1,5 +1,5 @@
 # Not Magnus
-Learner classical chess engine. The goal of this project is to first and foremost learn the principles behind chess engines, and attempt to implement the most popular algorithims in modern chess engines. While I am trying to make the engine as strong as possible, the primary concern is clarity and simplicity (this engine is written in Python after all).
+Learner classical chess engine. The goal of this project is to first and foremost learn the principles behind chess engines, and attempt to implement the most popular algorithims in modern chess engines. While I am trying to make the engine as strong as possible, the primary concern is readability and simplicity (this engine is written in Python after all).
 
 Uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/polyglot-collection.7z/download) and the [Gaviota endgame tablebase](https://chess.cygnitec.com/tablebases/gaviota/). To run, download, unzip, and save as `Opening Book/Book.bin` and `Endgame Book/...` (all .cp4 files in one folder), or turn off book usage by setting `OPENING_BOOK`/`ENDGAME_BOOK` to `False` in `util.py`.
 
