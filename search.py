@@ -11,7 +11,6 @@ import time
 from sys import stdout
 
 
-
 def qsearch(board, alpha, beta, movetime, stop):
     """
     Quiescence search to extend search depth until there are no more captures
@@ -39,6 +38,7 @@ def qsearch(board, alpha, beta, movetime, stop):
                 return beta
             alpha = max(alpha, score)
     return alpha
+
 
 
 def negamax(board, depth, alpha, beta, movetime, stop):
@@ -141,7 +141,7 @@ def negamax(board, depth, alpha, beta, movetime, stop):
         return (best_move, best_score)
 
 
-def MTDf(board, depth, guess):
+def MTDf(board: chess.Board, depth: int, guess: float) -> tuple(chess.Move, float):
     """
     Searches the possible moves using negamax by zooming in on the window
     Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
@@ -213,7 +213,7 @@ def cpu_move(board, depth, movetime, stop):
     start_time = time.time_ns()
     if OPENING_BOOK:
         try:
-            with chess.polyglot.open_reader("Opening Book/Book.bin") as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
+            with chess.polyglot.open_reader(OPENING_BOOK_LOCATION) as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
                 opening = opening_book.choice(board)
                 opening_book.close()
                 return opening.move
@@ -236,6 +236,6 @@ def cpu_move(board, depth, movetime, stop):
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
-    htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
+    htable = array([[[0 for x in range(64)] for y in range(64)] for z in range(2)]) # Reset history heuristic table
     
     return move

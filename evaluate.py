@@ -9,12 +9,12 @@ from util import *
 from piece_squares_tables import *
 
 
-def eval_endgame(board):
+def eval_endgame(board: chess.Board) -> int:
     """
     Evaluates an endgame position with 5 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
     """
-    with chess.gaviota.open_tablebase("Endgame Book") as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
+    with chess.gaviota.open_tablebase(ENDGAME_BOOK_LOCATION) as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
         if board.is_checkmate():
             return INF
         score = tablebase.get_dtm(board) * MATE_SCORE
@@ -24,7 +24,7 @@ def eval_endgame(board):
             return score
 
 
-def evaluate(board):
+def evaluate(board: chess.Board) -> float:
     """
     Game state evaluation function, score mimicking centipawns
     Values are relative so high values mean the board favors the current
@@ -62,7 +62,7 @@ def evaluate(board):
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         return eval_endgame(board)
     
-    material_values = [100, 320, 330, 500, 900, MATE_SCORE]
+    material_values = array([100, 320, 330, 500, 900, MATE_SCORE])
     mg_psqts = {
         "P": w_mg_pawn_table,
         "N": w_mg_knight_table,
@@ -91,7 +91,7 @@ def evaluate(board):
         "q": b_eg_queen_table,
         "k": b_eg_king_table,
     }
-    phase_scores = [0, 1, 1, 2, 4, 0]
+    phase_scores = array([0, 1, 1, 2, 4, 0])
 
     material_score = 0
     psqt_mg_score = 0
@@ -145,10 +145,10 @@ def evaluate(board):
                     passed_pawn_bonus = [0, 5, 10, 20, 40, 80, 160, 0]
                     pawn_file = chess.BB_FILES[chess.square_file(square)]
                     bb_passing_files = chess.SquareSet(pawn_file)
-                    if square % 8 != 0:
+                    if not is_square_a_file(square):
                         pawn_left_file = chess.BB_FILES[chess.square_file(square - 1)]
                         bb_passing_files |= chess.SquareSet(pawn_left_file)
-                    if (square + 1) % 8 != 0:
+                    if not is_square_h_file(square):
                         pawn_right_file = chess.BB_FILES[chess.square_file(square + 1)]
                         bb_passing_files |= chess.SquareSet(pawn_right_file)
                     if len(bb_passing_files & bitboards[not color][chess.PAWN][1]) == 0:
@@ -168,7 +168,7 @@ def evaluate(board):
                     knight_squares = bitboards[color][chess.KNIGHT][0]
                     bb_pawns = bitboards[color][chess.PAWN][1]
                     for knight_square in knight_squares:
-                        rank = (square // 8) + 1
+                        rank = get_square_rank(square)
                         if (color == chess.WHITE and (rank == 4 or rank == 5 or rank == 6)) or \
                             ((color == chess.BLACK) and (rank == 5 or rank == 4 or rank == 3)):
                                 if len(board.attackers(color, knight_square) & bb_pawns) >= 1:

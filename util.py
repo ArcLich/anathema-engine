@@ -4,17 +4,21 @@ Classical chess engine by Devin Zhang
 
 Helper functions, constants, and globals used throughout the program
 """
+from xmlrpc.client import boolean
 import chess
 import chess.svg
 import IPython.display
 import time
-
+from numpy import array
 
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
 DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = False # Use endgame book?
+OPENING_BOOK_LOCATION = "Opening Book/Book.bin"
+ENDGAME_BOOK_LOCATION = "Endgame Book"
+
 
 # Constants
 INF = float("inf")
@@ -22,11 +26,14 @@ MATE_SCORE = 99999
 
 # Other
 ttable = {} # Transposition table
-htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # History heuristic table [side to move][move from][move to]
+
 nodes = 0
 stop = False
+=======
+htable = array([[[0 for x in range(64)] for y in range(64)] for z in range(2)]) # History heuristic table [side to move][move from][move to]
 
-def display(board):
+
+def display(board: chess.Board) -> None:
     """
     Clears cell and displays visual board
     """
@@ -42,7 +49,7 @@ def display(board):
     IPython.display.display(chess.svg.board(board, orientation = orientation, lastmove = lastmove, size = 350))
 
 
-def rate(board, move, tt_move):
+def rate(board: chess.Board, move: chess.Move, tt_move: chess.Move) -> int:
     """
     Rates a move in relation to the following order for move ordering:
     - Refutation move (moves from transpositions) | score = 600
@@ -81,14 +88,14 @@ def rate(board, move, tt_move):
     return -1000
 
 
-def get_num_pieces(board):
+def get_num_pieces(board: chess.Board) -> int:
     """
     Get the number of pieces of all types and color on the board.
     """
     return len(board.piece_map())
 
 
-def null_move_ok(board):
+def null_move_ok(board: chess.Board) -> bool:
     """
     Returns true if conditions are met to perform null move pruning
     Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
@@ -99,7 +106,7 @@ def null_move_ok(board):
     return True
 
 
-def reduction_ok(board, move):
+def reduction_ok(board: chess.Board, move: chess.Move) -> bool:
     """
     Returns true if conditions are met to perform late move reduction
     Returns false if move:
@@ -116,7 +123,7 @@ def reduction_ok(board, move):
     return result
 
 
-def get_square_color(square):
+def get_square_color(square: chess.Square) -> chess.Color:
     """
     Given a square on the board return whether
     its a dark square or a light square
@@ -134,3 +141,23 @@ def uci_output(move, score, depth, nodes, time_search):
     except ZeroDivisionError:
         time_diff = 0.1
         return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+
+def is_square_a_file(square: chess.Square) -> bool:
+    """
+    Returns true if the square is on the A file
+    """
+    return square % 8 == 0
+
+
+def is_square_h_file(square: chess.Square) -> bool:
+    """
+    Returns true if the square is on the H file
+    """
+    return (square + 1) % 8 == 0
+
+
+def get_square_rank(square: chess.Square) -> int:
+    """
+    Returns the rank of the square (1-8)
+    """
+    return (square // 8) + 1
