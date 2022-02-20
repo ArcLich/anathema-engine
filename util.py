@@ -7,6 +7,7 @@ Helper functions, constants, and globals used throughout the program
 import chess
 import chess.svg
 import IPython.display
+import time
 
 
 # Options
@@ -22,7 +23,8 @@ MATE_SCORE = 99999
 # Other
 ttable = {} # Transposition table
 htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # History heuristic table [side to move][move from][move to]
-
+nodes = 0
+stop = False
 
 def display(board):
     """
@@ -92,7 +94,7 @@ def null_move_ok(board):
     Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
     """
     endgame_threshold = 14
-    if (board.ply() >= 1 and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
+    if (board.ply() >= 1 and board.move_stack and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
         return False
     return True
 
@@ -123,3 +125,12 @@ def get_square_color(square):
         return chess.BLACK
     else:
         return chess.WHITE
+
+def uci_output(move, score, depth, nodes, time_search):
+    time_now = time.time_ns()
+    time_diff = time_now - time_search
+    try:
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+    except ZeroDivisionError:
+        time_diff = 0.1
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
