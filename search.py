@@ -7,23 +7,31 @@ Search functions which navigate the game tree
 import chess.polyglot
 from evaluate import *
 from util import *
+import time
+from sys import stdout
 
 
-def qsearch(board: chess.Board, alpha: int, beta: int) -> int:
+def qsearch(board, alpha, beta, movetime, stop):
     """
     Quiescence search to extend search depth until there are no more captures
     """
+    global nodes
+    
+    if stop() or movetime - (time.time_ns() - start_time)*10**-6 <= 0:
+        return 0
     stand_pat = evaluate(board)
+    nodes += 1
+    
     if stand_pat >= beta:
         return beta
     alpha = max(alpha, stand_pat)
-
+    
     moves = list(board.legal_moves)
     moves.sort(key = lambda move : rate(board, move, None), reverse = True)
     for move in moves:
         if board.is_capture(move):
             board.push(move)
-            score = -qsearch(board, -beta, -alpha)
+            score = -qsearch(board, -beta, -alpha, movetime, stop)
             board.pop()
 
             if score >= beta:
@@ -32,7 +40,8 @@ def qsearch(board: chess.Board, alpha: int, beta: int) -> int:
     return alpha
 
 
-def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[chess.Move, float]:
+
+def negamax(board, depth, alpha, beta, movetime, stop):
     """
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
@@ -41,6 +50,10 @@ def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[ches
     TODO
     - parallel search
     """
+    global nodes
+    
+    if stop() or movetime - (time.time_ns() - start_time)*10**-6 <= 0:
+        return (None, 0)
     key = chess.polyglot.zobrist_hash(board) #TODO generating new hash every time instead of incrementing is expensive
     tt_move = None
     old_alpha = alpha
@@ -49,6 +62,7 @@ def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[ches
     if key in ttable:
         tt_depth, tt_move, tt_score, flag = ttable[key]
         if tt_depth >= depth:
+            nodes += 1
             if flag == "EXACT":
                 alpha = tt_score
             elif flag == "LOWERBOUND":
@@ -59,7 +73,7 @@ def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[ches
                 return (None, tt_score)
 
     if depth <= 0 or board.is_game_over(claim_draw = True): # TODO optimize draw by repition detection, tt draw result
-        score = qsearch(board, alpha, beta)
+        score = qsearch(board, alpha, beta, movetime, stop)
 
         # Add position to the transposition table
         if score <= old_alpha:
@@ -75,7 +89,7 @@ def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[ches
         if null_move_ok(board):
             null_move_depth_reduction = 2
             board.push(chess.Move.null())
-            score = -negamax(board, depth - 1 - null_move_depth_reduction, -beta, -beta + 1)[1]
+            score = -negamax(board, depth - 1 - null_move_depth_reduction, -beta, -beta + 1, movetime, stop)[1]
             board.pop()
             if score >= beta:
                 return (None, score)
@@ -100,7 +114,7 @@ def negamax(board: chess.Board, depth: int, alpha: int, beta: int) -> tuple[ches
             if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move):
                 late_move_depth_reduction = 1
 
-            score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha)[1]
+            score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha, movetime, stop)[1]
             board.pop()
             moves_searched += 1
 
@@ -150,18 +164,39 @@ def MTDf(board: chess.Board, depth: int, guess: float) -> tuple(chess.Move, floa
     return (move, guess)
 
 
-def iterative_deepening(board: chess.Board, depth: int) -> tuple(chess.Move, float):
+def iterative_deepening(board, depth, movetime, stop):
     """
     Approaches the desired depth in steps using MTD(f)
     """
+    global nodes
+    global start_time
+    
     guess = 0
+    results = []
     for d in range(1, depth + 1):
+        if stop() or movetime - (time.time_ns() - start_time)*10**-6 <= 0:
+            break
         # move, guess = MTDf(board, d, guess)
-        move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE)
+        move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE, movetime, stop)
+        if not stop() and movetime - (time.time_ns() - start_time)*10**-6 > 0:
+            stdout.write(uci_output(move, guess, d, nodes, start_time))
+            stdout.flush()
+            results.append([move, guess, d, nodes, start_time])
+    if results:
+        move, guess, d, nodes, start_time = results[-1]
+        stdout.write(uci_output(move, guess, d, nodes, start_time))
+        stdout.flush()
+        stdout.write("bestmove {}\n".format(move))
+        stdout.flush() 
+    else:
+        stdout.write(uci_output(move, guess, d, nodes, start_time))
+        stdout.flush()
+        stdout.write("bestmove {}\n".format(move))
+        stdout.flush() 
     return (move, guess)
     
     
-def cpu_move(board: chess.Board, depth: int) -> chess.Move:
+def cpu_move(board, depth, movetime, stop):
     """
     Chooses a move for the CPU
     If inside opening book make book move
@@ -171,7 +206,11 @@ def cpu_move(board: chess.Board, depth: int) -> chess.Move:
     global OPENING_BOOK
     global ttable
     global htable
-
+    global start_time
+    global nodes
+    
+    nodes = 0
+    start_time = time.time_ns()
     if OPENING_BOOK:
         try:
             with chess.polyglot.open_reader(OPENING_BOOK_LOCATION) as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
@@ -191,13 +230,12 @@ def cpu_move(board: chess.Board, depth: int) -> chess.Move:
         move = max(evals, key = lambda eval : eval[1])[0]
         return move
 
-    move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
+    # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
     # move = MTDf(board, depth, 0)[0]
-    # move = iterative_deepening(board, depth)[0]
+    move = iterative_deepening(board, depth, movetime, stop)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
     htable = array([[[0 for x in range(64)] for y in range(64)] for z in range(2)]) # Reset history heuristic table
     
     return move
-    

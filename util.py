@@ -8,8 +8,8 @@ from xmlrpc.client import boolean
 import chess
 import chess.svg
 import IPython.display
+import time
 from numpy import array
-
 
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
@@ -26,6 +26,10 @@ MATE_SCORE = 99999
 
 # Other
 ttable = {} # Transposition table
+
+nodes = 0
+stop = False
+=======
 htable = array([[[0 for x in range(64)] for y in range(64)] for z in range(2)]) # History heuristic table [side to move][move from][move to]
 
 
@@ -97,7 +101,7 @@ def null_move_ok(board: chess.Board) -> bool:
     Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
     """
     endgame_threshold = 14
-    if (board.ply() >= 1 and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
+    if (board.ply() >= 1 and board.move_stack and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
         return False
     return True
 
@@ -129,6 +133,14 @@ def get_square_color(square: chess.Square) -> chess.Color:
     else:
         return chess.WHITE
 
+def uci_output(move, score, depth, nodes, time_search):
+    time_now = time.time_ns()
+    time_diff = time_now - time_search
+    try:
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+    except ZeroDivisionError:
+        time_diff = 0.1
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
 
 def is_square_a_file(square: chess.Square) -> bool:
     """
