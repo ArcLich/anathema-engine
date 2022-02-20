@@ -147,10 +147,10 @@ def evaluate(board):
                     bb_passing_files = chess.SquareSet(pawn_file)
                     if square % 8 != 0:
                         pawn_left_file = chess.BB_FILES[chess.square_file(square - 1)]
-                        bb_passing_files = bb_passing_files | chess.SquareSet(pawn_left_file)
+                        bb_passing_files |= chess.SquareSet(pawn_left_file)
                     if (square + 1) % 8 != 0:
                         pawn_right_file = chess.BB_FILES[chess.square_file(square + 1)]
-                        bb_passing_files = bb_passing_files | chess.SquareSet(pawn_right_file)
+                        bb_passing_files |= chess.SquareSet(pawn_right_file)
                     if len(bb_passing_files & bitboards[not color][chess.PAWN][1]) == 0:
                         if color == chess.WHITE:
                             piece_specific_score += passed_pawn_bonus[square // 8] * relative_weight
@@ -194,7 +194,7 @@ def evaluate(board):
                     squares_foe_sliders = bitboards[not color][chess.BISHOP][0] + bitboards[not color][chess.ROOK][0] + bitboards[not color][chess.QUEEN][0]
                     bb_foe_sliders = chess.SquareSet(chess.BB_EMPTY)
                     for foe_square in squares_foe_sliders:
-                        bb_foe_sliders = bb_foe_sliders | board.attacks(foe_square)
+                        bb_foe_sliders |= board.attacks(foe_square)
                     if board.attacks(square) & bb_foe_sliders != 0:
                         piece_specific_score += queen_pinned_penalty * relative_weight
                 
