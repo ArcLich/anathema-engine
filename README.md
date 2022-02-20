@@ -27,7 +27,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 
 ------
 2/20/22 v1.8
-> Rewrote the evaluation function again with the innovation of bitboards.
+> Rewrote the evaluation function again with the innovation of bitboards, laying the groundwork for evaluation improvements.
 > 
 > Implemented bonuses for passed pawns and knights on outpost squares.
 > 
