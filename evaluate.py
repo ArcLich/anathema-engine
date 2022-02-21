@@ -59,6 +59,9 @@ def evaluate(board):
     """
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         return eval_endgame(board)
+
+    if board.is_checkmate():
+        return -MATE_SCORE
     
     material_values = [100, 320, 330, 500, 900, MATE_SCORE]
     mg_psqts = {
@@ -143,8 +146,7 @@ def evaluate(board):
                 # Piece-specific evaluation
                 if piece == chess.PAWN:
                     # Penalty to bishop by number of pawns on bishop's square color
-                    # pawn_bishop_penalty = -2
-                    pawn_bishop_penalty = 0
+                    pawn_bishop_penalty = -2
                     bishop_squares = bitboards[color][chess.BISHOP][0]
                     if len(bishop_squares) != 2: # Technically incorrect, but situations with 2+ same colored bishops are unlikely
                         for bishop_square in bishop_squares:
@@ -152,8 +154,7 @@ def evaluate(board):
                                 piece_specific_score += pawn_bishop_penalty * relative_weight
 
                     # Bonus to passed pawn
-                    # passed_pawn_bonus = [0, 5, 10, 20, 40, 80, 160, 0]
-                    passed_pawn_bonus = [0, 0, 0, 0, 0, 0, 0, 0]
+                    passed_pawn_bonus = [0, 5, 10, 20, 40, 80, 160, 0]
                     pawn_file = chess.BB_FILES[chess.square_file(square)]
                     bb_passing_files = chess.SquareSet(pawn_file)
                     if not is_square_a_file(square):
@@ -169,15 +170,13 @@ def evaluate(board):
                             piece_specific_score += passed_pawn_bonus[8 - ((square // 8) + 1)] * relative_weight
 
                     # Penalty to isolated pawn
-                    # pawn_isolated_penalty = -20
-                    pawn_isolated_penalty = 0
+                    pawn_isolated_penalty = -20
                     if len(bb_passing_files & bitboards[color][chess.PAWN][1]) != 3:
                         piece_specific_score += pawn_isolated_penalty * relative_weight
 
                 elif piece == chess.KNIGHT:
                     # Bonus to knight on outpost (a square on rank 4, 5, or 6 defended by a friendly pawn)
-                    # knight_outpost_bonus = 25
-                    knight_outpost_bonus = 0
+                    knight_outpost_bonus = 25
                     knight_squares = bitboards[color][chess.KNIGHT][0]
                     bb_pawns = bitboards[color][chess.PAWN][1]
                     for knight_square in knight_squares:
@@ -197,8 +196,7 @@ def evaluate(board):
 
                 elif piece == chess.ROOK:
                     # Bonus to rook on open file
-                    # rook_open_file_bonus = 50
-                    rook_open_file_bonus = 0
+                    rook_open_file_bonus = 50
                     rook_file = chess.BB_FILES[chess.square_file(square)]
                     bb_rook_file = chess.SquareSet(rook_file)
                     bb_friend_pawns = bitboards[color][chess.PAWN][1]
@@ -214,8 +212,7 @@ def evaluate(board):
 
                 elif piece == chess.QUEEN:
                     # Penalty to pinned queen
-                    # queen_pinned_penalty = -50
-                    queen_pinned_penalty = 0
+                    queen_pinned_penalty = -50
                     squares_foe_sliders = bitboards[not color][chess.BISHOP][0] + bitboards[not color][chess.ROOK][0] + bitboards[not color][chess.QUEEN][0]
                     bb_foe_sliders = chess.SquareSet(chess.BB_EMPTY)
                     for foe_square in squares_foe_sliders:
@@ -240,9 +237,9 @@ def evaluate(board):
     mobility_score = len(list(board.legal_moves))
     
     # Totaling scores
-    material_weight = 0
-    psqt_weight = 0
-    mobility_weight = 0
+    material_weight = 10
+    psqt_weight = 1
+    mobility_weight = 1
     piece_specific_weight = 1
     score = (material_weight * material_score) \
             + (psqt_weight * psqt_score) \

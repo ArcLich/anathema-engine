@@ -6,7 +6,6 @@ Search functions which navigate the game tree
 """
 import chess.polyglot
 from evaluate import *
-from util import *
 from sys import stdout
 
 

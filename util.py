@@ -12,7 +12,7 @@ import time
 
 # Options
 START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
-DEPTH = 1 # Search depth, minimum 1
+DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = False # Use endgame book?
 OPENING_BOOK_LOCATION = "Opening Book/Book.bin"
@@ -153,10 +153,12 @@ def uci_output(move, score, depth, nodes, time_search):
     time_now = time.time_ns()
     time_diff = time_now - time_search
     try:
-        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n"\
+            .format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
     except ZeroDivisionError:
         time_diff = 0.1
-        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n"\
+            .format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
 
 
 def can_exit_search(movetime, stop, start_time):
