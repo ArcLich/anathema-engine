@@ -153,13 +153,13 @@ def uci_output(move, score, depth, nodes, time_search):
     time_now = time.time_ns()
     time_diff = time_now - time_search
     try:
-        return "Info: depth {}, score {}, nodes {}, nps {}, time {}, pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
     except ZeroDivisionError:
         time_diff = 0.1
-        return "Info: depth {}, score {}, nodes {}, nps {}, time {}, pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+        return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n".format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
 
 
-def can_exit_search(movetime, stop):
+def can_exit_search(movetime, stop, start_time):
     """
     Returns true if stop command given or too much time elapsed on search
     """

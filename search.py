@@ -16,7 +16,7 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     """
     global nodes
     
-    if can_exit_search(movetime, stop):
+    if can_exit_search(movetime, stop, start_time):
         return 0
 
     stand_pat = evaluate(board)
@@ -54,7 +54,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
     """
     global nodes
     
-    if can_exit_search(movetime, stop):
+    if can_exit_search(movetime, stop, start_time):
         return (None, 0)
 
     key = chess.polyglot.zobrist_hash(board) #TODO generating new hash every time instead of incrementing is expensive
@@ -155,12 +155,12 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     guess = 0
     results = []
     for d in range(1, depth + 1):
-        if can_exit_search(movetime, stop):
+        if can_exit_search(movetime, stop, start_time):
             break
 
         move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE, movetime, stop)
 
-        if not can_exit_search(movetime, stop):
+        if not can_exit_search(movetime, stop, start_time):
             stdout.write(uci_output(move, guess, d, nodes, start_time))
             stdout.flush()
             results.append([move, guess, d, nodes, start_time])
@@ -180,7 +180,7 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     return (move, guess)
     
     
-def cpu_move(board, depth, movetime = INF, stop = lambda: False):
+def cpu_move(board, depth, movetime, stop):
     """
     Chooses a move for the CPU
     If inside opening book make book move
