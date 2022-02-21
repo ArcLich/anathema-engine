@@ -25,7 +25,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 ------
 
 ## Installation and Usage
-**Requires** the `python-chess` module:
+*Requires* the `python-chess` module:
 > pip install chess
 
 This engine optionally uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/polyglot-collection.7z/download) and the [Gaviota endgame tablebase](https://chess.cygnitec.com/tablebases/gaviota/). To run, download, unzip, and save as `Opening Book/Book.bin` and `Endgame Book/...` (all .cp4 files in one folder), or turn off book usage by setting `OPENING_BOOK`/`ENDGAME_BOOK` to `False` in `util.py`. The file locations for the tablebases can be modified in `util.py` as well.
