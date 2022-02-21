@@ -180,7 +180,7 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     return (move, guess)
     
     
-def cpu_move(board, depth, movetime, stop):
+def cpu_move(board, depth, movetime = INF, stop = lambda: False):
     """
     Chooses a move for the CPU
     If inside opening book make book move
