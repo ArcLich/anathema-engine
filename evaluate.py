@@ -9,7 +9,7 @@ from util import *
 from piece_squares_tables import *
 
 
-def eval_endgame(board: chess.Board) -> int:
+def eval_endgame(board):
     """
     Evaluates an endgame position with 5 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
@@ -24,7 +24,7 @@ def eval_endgame(board: chess.Board) -> int:
             return score
 
 
-def evaluate(board: chess.Board) -> float:
+def evaluate(board):
     """
     Game state evaluation function, score mimicking centipawns
     Values are relative so high values mean the board favors the current
@@ -56,6 +56,7 @@ def evaluate(board: chess.Board) -> float:
     - Texel's tuning method
     - king pawn tropism
     - king safety
+    - different scores for mg, eg
     """
 
 

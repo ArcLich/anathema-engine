@@ -1,3 +1,9 @@
+"""
+Not Magnus
+Classical chess engine by Devin Zhang
+
+Piece-squares tables for evaluation
+"""
 from numpy import array
 
 

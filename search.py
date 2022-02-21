@@ -7,18 +7,18 @@ Search functions which navigate the game tree
 import chess.polyglot
 from evaluate import *
 from util import *
-import time
 from sys import stdout
 
 
-def qsearch(board, alpha, beta, movetime, stop):
+def qsearch(board, alpha, beta, movetime = INF, stop = False):
     """
     Quiescence search to extend search depth until there are no more captures
     """
     global nodes
     
-    if stop() or movetime - (time.time_ns() - start_time)*10**-6 <= 0:
+    if can_exit_search(movetime, stop):
         return 0
+
     stand_pat = evaluate(board)
     nodes += 1
     
@@ -41,19 +41,21 @@ def qsearch(board, alpha, beta, movetime, stop):
 
 
 
-def negamax(board, depth, alpha, beta, movetime, stop):
+def negamax(board, depth, alpha, beta, movetime = INF, stop = False):
     """
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
     Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
+    - MTDf or MTD-bi
     - parallel search
     """
     global nodes
     
-    if stop() or movetime - (time.time_ns() - start_time)*10**-6 <= 0:
+    if can_exit_search(movetime, stop):
         return (None, 0)
+
     key = chess.polyglot.zobrist_hash(board) #TODO generating new hash every time instead of incrementing is expensive
     tt_move = None
     old_alpha = alpha
@@ -141,47 +143,27 @@ def negamax(board, depth, alpha, beta, movetime, stop):
         return (best_move, best_score)
 
 
-def MTDf(board: chess.Board, depth: int, guess: float) -> tuple(chess.Move, float):
-    """
-    Searches the possible moves using negamax by zooming in on the window
-    Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
-    """
-    upperbound = MATE_SCORE
-    lowerbound = -MATE_SCORE
-    while (lowerbound < upperbound):
-        if guess == lowerbound:
-            beta = guess + 1
-        else:
-            beta = guess
-
-        move, guess = negamax(board, depth, beta - 1, beta)
-
-        if guess < beta:
-            upperbound = guess
-        else:
-            lowerbound = guess
-
-    return (move, guess)
-
-
-def iterative_deepening(board, depth, movetime, stop):
+def iterative_deepening(board, depth, movetime = INF, stop = False):
     """
     Approaches the desired depth in steps using MTD(f)
     """
     global nodes
     global start_time
     
+    move = None
     guess = 0
     results = []
     for d in range(1, depth + 1):
-        if stop() or movetime - (time.time_ns() - start_time)*10**-6 <= 0:
+        if can_exit_search(movetime, stop):
             break
-        # move, guess = MTDf(board, d, guess)
+
         move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE, movetime, stop)
+
         if not stop() and movetime - (time.time_ns() - start_time)*10**-6 > 0:
             stdout.write(uci_output(move, guess, d, nodes, start_time))
             stdout.flush()
             results.append([move, guess, d, nodes, start_time])
+
     if results:
         move, guess, d, nodes, start_time = results[-1]
         stdout.write(uci_output(move, guess, d, nodes, start_time))
@@ -192,11 +174,12 @@ def iterative_deepening(board, depth, movetime, stop):
         stdout.write(uci_output(move, guess, d, nodes, start_time))
         stdout.flush()
         stdout.write("bestmove {}\n".format(move))
-        stdout.flush() 
+        stdout.flush()
+
     return (move, guess)
     
     
-def cpu_move(board, depth, movetime, stop):
+def cpu_move(board, depth, movetime = INF, stop = False):
     """
     Chooses a move for the CPU
     If inside opening book make book move
@@ -206,11 +189,13 @@ def cpu_move(board, depth, movetime, stop):
     global OPENING_BOOK
     global ttable
     global htable
-    global start_time
+
     global nodes
+    global start_time
     
     nodes = 0
     start_time = time.time_ns()
+
     if OPENING_BOOK:
         try:
             with chess.polyglot.open_reader(OPENING_BOOK_LOCATION) as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
