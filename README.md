@@ -1,5 +1,5 @@
 # Not Magnus
-Learner classical chess engine. The goal of this project is to first and foremost learn the principles behind chess engines, and attempt to implement the most popular algorithims in modern chess engines. While I am trying to make the engine as strong as possible, the primary concern is readability and simplicity (this engine is written in Python after all).
+UCI-compatible learner classical chess engine. The goal of this project is to first and foremost learn the principles behind chess engines, and attempt to implement the most popular algorithims in modern chess engines. While I am trying to make the engine as strong as possible, the primary concern is readability and simplicity (this engine is written in Python after all).
 
 Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus for his thesis "Alpha-Beta with Sibling Prediction Pruning in Chess." I wouldn't be anywhere without their help.
 
