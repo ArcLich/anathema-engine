@@ -11,7 +11,7 @@ This engine optionally uses [codekiddy2's opening book](https://sourceforge.net/
 
 Search depth and playing color can also be modified in `util.py`. Change player to `"COMPUTER"` for the engine to play against itself. Other parameters such as evaluation scoring, weights, and alpha-beta bounds can be found in the appropriate places. Change these values to change the engine's behavior.
 
-Through `main.ipynb`, you can run the engine with a Jupyter Notebook. Input takes chess moves in algebraic notation (e4, Nf3, d8Q etc). Input "undo" to take back your last move.
+Through `main.ipynb`, you can run the engine with a Jupyter Notebook. Input takes chess moves in algebraic notation (e4, Nf3, d8Q, etc). Input "undo" to take back your last move.
 > pip install notebook
 > 
 > jupyter notebook
