@@ -41,6 +41,8 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - UCI-compatibility
 
 ------
+2/21/22 v1.8.1
+> Committed Disservin's UCI bug fixes. Fixed bug where evaluation does not detect mate.
 
 ## Devlog
 2/20/22 v1.8
