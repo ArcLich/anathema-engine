@@ -10,10 +10,9 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 ------
 
 ## Current Features
-- Fail soft alpha-beta negamax search
+- Fail soft alpha-beta negamax search (in an iterative deepneing framework)
 - Move ordering enhancement (with history heuristic)
 - Transposition table
-- MTD(f) search (in an iterative deepneing framework)
 - Quiescence search
 - Null move pruning
 - Late move reduction
@@ -24,6 +23,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Tapered evaluation
 - Mobility evaluation
 - Piece-specific evaluation
+- UCI-compatibility
 
 ------
 
@@ -34,12 +34,16 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 > Implemented bonuses for passed pawns and knights on outpost squares.
 > 
 > Implemented penalties for pinned queens, pawns being on the same colored square as the friendly bishops, and isolated pawns.
+> 
+> Committed Disservin's UCI update.
 
 2/19/22 v1.7.5
 > Update the piece-squares tables to be one list instead of 8 nested lists. Value indices now reflect the squares they belong to.
 
 2/17/22 v1.7.4
 > Committed Disservin's changes to the transposition table. Slightly modified file to clean up deprecated code, more variable consistency, and moved the timing to the main game loop to display time for computer to crunch out each move.
+> 
+> MTD(f) slows down considerably for some reasons due to this. Temporarily removed it.
 
 2/10/22 v1.7.3
 > Added an evaluation bonus for rooks on open files and semi-open files.
