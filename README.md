@@ -5,6 +5,24 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 
 ------
 
+## Installation and Usage
+Requires the `python-chess` module:
+> pip install chess
+
+This engine optionally uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/polyglot-collection.7z/download) and the [Gaviota endgame tablebase](https://chess.cygnitec.com/tablebases/gaviota/). To run, download, unzip, and save as `Opening Book/Book.bin` and `Endgame Book/...` (all .cp4 files in one folder), or turn off book usage by setting `OPENING_BOOK`/`ENDGAME_BOOK` to `False` in `util.py`. The file locations for the tablebases can be modified in `util.py` as well.
+
+Search depth and playing color can also be modified in `util.py`. Change player to `"COMPUTER"` for the engine to play against itself. Other parameters such as evaluation scoring, weights, and alpha-beta bounds can be found in the appropriate places. Change these values to change the engine's behavior.
+
+Through `main.ipynb`, you can run the engine with a Jupyter Notebook. Input takes chess moves in algebraic notation (e4, Nf3, etc). Input "undo" to take back your last move.
+> pip install notebook
+> jupyter notebook
+
+Alternatively, you can save the engine as an executable and run with any chess GUI through `uci.py`. An installation of the `python-chess` module is not necessary if you use this method.
+> pip install pyinstaller
+> pyinstaller --onefile -n not-magnus uci.py
+
+------
+
 ## Current Features
 - Fail soft alpha-beta negamax search (in an iterative deepneing framework)
 - Move ordering enhancement (with history heuristic)
@@ -21,24 +39,6 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Piece-specific evaluation
 - King safety evaluation
 - UCI-compatibility
-
-------
-
-## Installation and Usage
-Requires the `python-chess` module:
-> pip install chess
-
-This engine optionally uses [codekiddy2's opening book](https://sourceforge.net/projects/codekiddy-chess/files/Books/Polyglot%20books/Update1/polyglot-collection.7z/download) and the [Gaviota endgame tablebase](https://chess.cygnitec.com/tablebases/gaviota/). To run, download, unzip, and save as `Opening Book/Book.bin` and `Endgame Book/...` (all .cp4 files in one folder), or turn off book usage by setting `OPENING_BOOK`/`ENDGAME_BOOK` to `False` in `util.py`. The file locations for the tablebases can be modified in `util.py` as well.
-
-Search depth and playing color can also be modified in `util.py`. Change player to `"COMPUTER"` for the engine to play against itself. Other parameters such as evaluation scoring, weights, and alpha-beta bounds can be found in the appropriate places. Change these values to change the engine's behavior.
-
-Through `main.ipynb`, you can run the engine with a Jupyter Notebook. Input takes chess moves in algebraic notation (e4, Nf3, etc). Input "undo" to take back your last move.
-> pip install notebook
-> jupyter notebook
-
-Alternatively, you can save the engine as an executable and run with any chess GUI through `uci.py`. An installation of the `python-chess` module is not necessary if you use this method.
-> pip install pyinstaller
-> pyinstaller --onefile -n not-magnus uci.py
 
 ------
 
