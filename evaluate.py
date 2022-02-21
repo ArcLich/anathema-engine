@@ -227,7 +227,7 @@ def evaluate(board):
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 5
 
         # Bonus to attacks on the enemy king zone
-        king_attack_units = max(king_attack_units, 61)
+        king_attack_units = min(king_attack_units, 61)
         piece_specific_score += king_threat_table[king_attack_units] * relative_weight
 
 
@@ -240,9 +240,9 @@ def evaluate(board):
     mobility_score = len(list(board.legal_moves))
     
     # Totaling scores
-    material_weight = 10
-    psqt_weight = 1
-    mobility_weight = 1
+    material_weight = 0
+    psqt_weight = 0
+    mobility_weight = 0
     piece_specific_weight = 1
     score = (material_weight * material_score) \
             + (psqt_weight * psqt_score) \
