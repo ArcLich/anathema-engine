@@ -3,8 +3,6 @@ UCI-compatible learner classical chess engine. The goal of this project is to fi
 
 Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus for his thesis "Alpha-Beta with Sibling Prediction Pruning in Chess." I wouldn't be anywhere without their help.
 
-------
-
 ## Installation and Usage
 Requires the `python-chess` module:
 > pip install chess
