@@ -13,10 +13,12 @@ Search depth and playing color can also be modified in `util.py`. Change player 
 
 Through `main.ipynb`, you can run the engine with a Jupyter Notebook. Input takes chess moves in algebraic notation (e4, Nf3, etc). Input "undo" to take back your last move.
 > pip install notebook
+> 
 > jupyter notebook
 
 Alternatively, you can save the engine as an executable and run with any chess GUI through `uci.py`. An installation of the `python-chess` module is not necessary if you use this method.
 > pip install pyinstaller
+> 
 > pyinstaller --onefile -n not-magnus uci.py
 
 ------
