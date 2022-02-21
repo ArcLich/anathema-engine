@@ -10,7 +10,7 @@ from util import *
 from sys import stdout
 
 
-def qsearch(board, alpha, beta, movetime = INF, stop = False):
+def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     """
     Quiescence search to extend search depth until there are no more captures
     """
@@ -41,7 +41,7 @@ def qsearch(board, alpha, beta, movetime = INF, stop = False):
 
 
 
-def negamax(board, depth, alpha, beta, movetime = INF, stop = False):
+def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
     """
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
@@ -50,6 +50,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = False):
     TODO
     - MTDf or MTD-bi
     - parallel search
+    - extensions?
     """
     global nodes
     
@@ -112,7 +113,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = False):
             # Late move reduction
             late_move_depth_reduction = 0
             full_depth_moves_threshold = 4
-            reduction_threshold = 5
+            reduction_threshold = 4
             if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move):
                 late_move_depth_reduction = 1
 
@@ -143,7 +144,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = False):
         return (best_move, best_score)
 
 
-def iterative_deepening(board, depth, movetime = INF, stop = False):
+def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     """
     Approaches the desired depth in steps using MTD(f)
     """
@@ -159,7 +160,7 @@ def iterative_deepening(board, depth, movetime = INF, stop = False):
 
         move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE, movetime, stop)
 
-        if not stop() and movetime - (time.time_ns() - start_time)*10**-6 > 0:
+        if not can_exit_search(movetime, stop):
             stdout.write(uci_output(move, guess, d, nodes, start_time))
             stdout.flush()
             results.append([move, guess, d, nodes, start_time])
@@ -179,7 +180,7 @@ def iterative_deepening(board, depth, movetime = INF, stop = False):
     return (move, guess)
     
     
-def cpu_move(board, depth, movetime = INF, stop = False):
+def cpu_move(board, depth, movetime = INF, stop = lambda: False):
     """
     Chooses a move for the CPU
     If inside opening book make book move
@@ -215,12 +216,10 @@ def cpu_move(board, depth, movetime = INF, stop = False):
         move = max(evals, key = lambda eval : eval[1])[0]
         return move
 
-    # move = negamax(board, depth, -MATE_SCORE, MATE_SCORE)[0]
-    # move = MTDf(board, depth, 0)[0]
     move = iterative_deepening(board, depth, movetime, stop)[0]
 
     if board.is_irreversible(move): # Reset transposition table
         ttable.clear()
-    htable = array([[[0 for x in range(64)] for y in range(64)] for z in range(2)]) # Reset history heuristic table
+    htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     
     return move

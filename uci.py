@@ -15,7 +15,7 @@ def main():
     stop_threads = False
     
     def output(s):
-        out.write(str(s+"\n"))
+        out.write(str(s + "\n"))
         out.flush()
     
     while True:
@@ -53,7 +53,7 @@ def main():
                 if fen_or_startpos == "fen":
                     board = chess.Board()
                     index_fen = command.find("fen")
-                    fen = command[(index_fen+4):index_moves]
+                    fen = command[(index_fen + 4):index_moves]
                     board.set_fen(fen)
                 elif fen_or_startpos == "startpos":
                     board = chess.Board()
@@ -80,16 +80,16 @@ def main():
                 nodes = int(parameters[2])
             elif "wtime" in parameters:
                 index_time = parameters.index("wtime")
-                wtime = int(parameters[index_time+1])
+                wtime = int(parameters[index_time + 1])
             elif "btime" in parameters:
                 index_time = parameters.index("btime")
-                btime = int(parameters[index_time+1]) 
+                btime = int(parameters[index_time + 1]) 
             elif "winc" in parameters:
                 index_inc = parameters.index("winc")
-                winc = int(parameters[index_time+1])
+                winc = int(parameters[index_time + 1])
             elif "binc" in parameters:
                 index_inc = parameters.index("binc")
-                binc = int(parameters[index_time+1])
+                binc = int(parameters[index_time + 1])
             else:
                 depth = 255
             try:

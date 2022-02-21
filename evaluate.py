@@ -41,6 +41,7 @@ def evaluate(board):
     - Rooks on open and semi-open files
     - Passed pawns
     - Knights on outposts (squares on rank 4, 5, or 6 defended by a friendly pawn)
+    - Attacks on the enemy king zone (ring around the king plus 3 forward squares towards the enemy)
 
     Penalizes
     - Pinned queens
@@ -49,21 +50,17 @@ def evaluate(board):
 
     Material score values from Tomasz Michniewski's Simplified Evaluation Function
     Piece-squares table values and tapered evaluation from Ronald Friederich's PeSTO's Evaluation Function
+    King threat table values from Stockfish
 
     TODO
-    - fine tune weights
-    - king safety
-    - Texel's tuning method
+    - fine tune weights (Texel's tuning method)
     - king pawn tropism
-    - king safety
     - different scores for mg, eg
     """
-
-
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         return eval_endgame(board)
     
-    material_values = array([100, 320, 330, 500, 900, MATE_SCORE])
+    material_values = [100, 320, 330, 500, 900, MATE_SCORE]
     mg_psqts = {
         "P": w_mg_pawn_table,
         "N": w_mg_knight_table,
@@ -92,7 +89,14 @@ def evaluate(board):
         "q": b_eg_queen_table,
         "k": b_eg_king_table,
     }
-    phase_scores = array([0, 1, 1, 2, 4, 0])
+    phase_scores = [0, 1, 1, 2, 4, 0]
+    king_threat_table = [0,  0,   1,   2,   3,   5,   7,   9,  12,    15, \
+                        18,  22,  26,  30,  35,  39,  44,  50,  56,   62, \
+                        68,  75,  82,  85,  89,  97, 105, 113, 122,  131, \
+                        140, 150, 169, 180, 191, 202, 213, 225, 237, 248, \
+                        260, 272, 283, 295, 307, 319, 330, 342, 354, 366, \
+                        377, 389, 401, 412, 424, 436, 448, 459, 471, 483, \
+                        494, 500]
 
     material_score = 0
     psqt_mg_score = 0
@@ -119,6 +123,10 @@ def evaluate(board):
     # Evaluation
     for color in [chess.WHITE, chess.BLACK]:
         relative_weight = 1 if color == board.turn else -1
+
+        bb_king_zone = get_bb_king_zone(board.king(not color), not color) # Initialize enemy king zone, bonus applied to attacks on the enemy king zone
+        king_attack_units = 0
+
         for piece in [chess.PAWN, chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN, chess.KING]:
             piece_symbol = chess.piece_symbol(piece).upper() if color == chess.WHITE else chess.piece_symbol(piece).lower()
             squares, bb = bitboards[color][piece]
@@ -135,7 +143,8 @@ def evaluate(board):
                 # Piece-specific evaluation
                 if piece == chess.PAWN:
                     # Penalty to bishop by number of pawns on bishop's square color
-                    pawn_bishop_penalty = -2
+                    # pawn_bishop_penalty = -2
+                    pawn_bishop_penalty = 0
                     bishop_squares = bitboards[color][chess.BISHOP][0]
                     if len(bishop_squares) != 2: # Technically incorrect, but situations with 2+ same colored bishops are unlikely
                         for bishop_square in bishop_squares:
@@ -143,7 +152,8 @@ def evaluate(board):
                                 piece_specific_score += pawn_bishop_penalty * relative_weight
 
                     # Bonus to passed pawn
-                    passed_pawn_bonus = [0, 5, 10, 20, 40, 80, 160, 0]
+                    # passed_pawn_bonus = [0, 5, 10, 20, 40, 80, 160, 0]
+                    passed_pawn_bonus = [0, 0, 0, 0, 0, 0, 0, 0]
                     pawn_file = chess.BB_FILES[chess.square_file(square)]
                     bb_passing_files = chess.SquareSet(pawn_file)
                     if not is_square_a_file(square):
@@ -159,26 +169,36 @@ def evaluate(board):
                             piece_specific_score += passed_pawn_bonus[8 - ((square // 8) + 1)] * relative_weight
 
                     # Penalty to isolated pawn
-                    pawn_isolated_penalty = -20
+                    # pawn_isolated_penalty = -20
+                    pawn_isolated_penalty = 0
                     if len(bb_passing_files & bitboards[color][chess.PAWN][1]) != 3:
                         piece_specific_score += pawn_isolated_penalty * relative_weight
 
-                if piece == chess.KNIGHT:
+                elif piece == chess.KNIGHT:
                     # Bonus to knight on outpost (a square on rank 4, 5, or 6 defended by a friendly pawn)
-                    knight_outpost_bonus = 25
+                    # knight_outpost_bonus = 25
+                    knight_outpost_bonus = 0
                     knight_squares = bitboards[color][chess.KNIGHT][0]
                     bb_pawns = bitboards[color][chess.PAWN][1]
                     for knight_square in knight_squares:
-                        rank = get_square_rank(square)
+                        rank = chess.square_rank(square) + 1
                         if (color == chess.WHITE and (rank == 4 or rank == 5 or rank == 6)) or \
                             ((color == chess.BLACK) and (rank == 5 or rank == 4 or rank == 3)):
                                 if len(board.attackers(color, knight_square) & bb_pawns) >= 1:
                                     piece_specific_score += knight_outpost_bonus * relative_weight
                                     break
 
-                if piece == chess.ROOK:
+                    # Bonus to attacks on the enemy king zone
+                    king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
+
+                elif piece == chess.BISHOP:
+                    # Bonus to attacks on the enemy king zone
+                    king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
+
+                elif piece == chess.ROOK:
                     # Bonus to rook on open file
-                    rook_open_file_bonus = 50
+                    # rook_open_file_bonus = 50
+                    rook_open_file_bonus = 0
                     rook_file = chess.BB_FILES[chess.square_file(square)]
                     bb_rook_file = chess.SquareSet(rook_file)
                     bb_friend_pawns = bitboards[color][chess.PAWN][1]
@@ -189,16 +209,27 @@ def evaluate(board):
                         else:
                             piece_specific_score += rook_open_file_bonus / 2 * relative_weight
 
-                if piece == chess.QUEEN:
+                    # Bonus to attacks on the enemy king zone
+                    king_attack_units += len(board.attacks(square) & bb_king_zone) * 3
+
+                elif piece == chess.QUEEN:
                     # Penalty to pinned queen
-                    queen_pinned_penalty = -50
+                    # queen_pinned_penalty = -50
+                    queen_pinned_penalty = 0
                     squares_foe_sliders = bitboards[not color][chess.BISHOP][0] + bitboards[not color][chess.ROOK][0] + bitboards[not color][chess.QUEEN][0]
                     bb_foe_sliders = chess.SquareSet(chess.BB_EMPTY)
                     for foe_square in squares_foe_sliders:
                         bb_foe_sliders |= board.attacks(foe_square)
                     if board.attacks(square) & bb_foe_sliders != 0:
                         piece_specific_score += queen_pinned_penalty * relative_weight
-                
+
+                    # Bonus to attacks on the enemy king zone
+                    king_attack_units += len(board.attacks(square) & bb_king_zone) * 5
+
+        # Bonus to attacks on the enemy king zone
+        king_attack_units = max(king_attack_units, 61)
+        piece_specific_score += king_threat_table[king_attack_units] * relative_weight
+
 
     # PSQT evaluation part 2
     mg_phase = max(phase, total_phase)
