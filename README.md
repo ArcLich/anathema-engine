@@ -23,6 +23,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 - Tapered evaluation
 - Mobility evaluation
 - Piece-specific evaluation
+- King safety evaluation
 - UCI-compatibility
 
 ------
@@ -31,7 +32,7 @@ Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus fo
 2/20/22 v1.8
 > Rewrote the evaluation function again with the innovation of bitboards, laying the groundwork for evaluation improvements.
 > 
-> Implemented bonuses for passed pawns and knights on outpost squares.
+> Implemented bonuses for passed pawns, knights on outpost squares, and king safety (via king attack squares).
 > 
 > Implemented penalties for pinned queens, pawns being on the same colored square as the friendly bishops, and isolated pawns.
 > 
