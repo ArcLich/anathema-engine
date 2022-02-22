@@ -25,17 +25,16 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
         return beta
     alpha = max(alpha, stand_pat)
     
-    moves = list(board.legal_moves)
-    moves.sort(key = lambda move : rate(board, move, None), reverse = True)
-    for move in moves:
-        if board.is_capture(move):
-            board.push(move)
-            score = -qsearch(board, -beta, -alpha, movetime, stop)
-            board.pop()
+    captures = list(board.generate_legal_captures())
+    captures.sort(key = lambda move : rate(board, move, None), reverse = True)
+    for capture in captures:
+        board.push(capture)
+        score = -qsearch(board, -beta, -alpha, movetime, stop)
+        board.pop()
 
-            if score >= beta:
-                return beta
-            alpha = max(alpha, score)
+        if score >= beta:
+            return beta
+        alpha = max(alpha, score)
     return alpha
 
 
@@ -47,7 +46,6 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
     Initial psuedocode adapated from Jeroen W.T. Carolus
 
     TODO
-    - MTDf or MTD-bi
     - parallel search
     - extensions?
     """
@@ -72,7 +70,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             elif flag == "UPPERBOUND":
                 beta = min(beta, tt_score)
             if alpha >= beta:
-                return (None, tt_score)
+                return (tt_move, tt_score)
 
     if depth <= 0 or board.is_game_over(claim_draw = True): # TODO optimize draw by repition detection, tt draw result
         score = qsearch(board, alpha, beta, movetime, stop)
@@ -112,7 +110,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             # Late move reduction
             late_move_depth_reduction = 0
             full_depth_moves_threshold = 4
-            reduction_threshold = 4
+            reduction_threshold = 3
             if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move):
                 late_move_depth_reduction = 1
 
@@ -126,7 +124,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
             alpha = max(alpha, best_score)
 
-            if best_score >= beta: # Beta cut-off (fails high)
+            if alpha >= beta: # Beta cut-off (fails high)
                 failed_high = True
                 if not board.is_capture(move):
                     htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] += depth**2 # Update history heuristic table
@@ -143,6 +141,26 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
         return (best_move, best_score)
 
 
+def MTDf(board, depth, guess, movetime = INF, stop = lambda: False):
+    """
+    Searches the possible moves using negamax by zooming in on the window
+    Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
+    """
+    upperbound = INF
+    lowerbound = -INF
+    while (lowerbound < upperbound):
+        if guess == lowerbound:
+            beta = guess + 1
+        else:
+            beta = guess
+        move, guess = negamax(board, depth, beta - 1, beta, movetime, stop)
+        if guess < beta:
+            upperbound = guess
+        else:
+            lowerbound = guess
+    return (move, guess)
+        
+
 def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     """
     Approaches the desired depth in steps using MTD(f)
@@ -151,32 +169,28 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     global start_time
     
     move = None
-    guess = 0
+    score = 0
     results = []
+    d = 0
     for d in range(1, depth + 1):
         if can_exit_search(movetime, stop, start_time):
             break
 
-        move, guess = negamax(board, d, -MATE_SCORE, MATE_SCORE, movetime, stop)
+        move, score = MTDf(board, d, 0, movetime, stop) # TODO further testing: Keeping guess at 0 is faster?
 
         if not can_exit_search(movetime, stop, start_time):
-            stdout.write(uci_output(move, guess, d, nodes, start_time))
+            stdout.write(uci_output(move, score, d, nodes, start_time))
             stdout.flush()
-            results.append([move, guess, d, nodes, start_time])
+            results.append([move, score, d, nodes, start_time])
 
     if results:
-        move, guess, d, nodes, start_time = results[-1]
-        stdout.write(uci_output(move, guess, d, nodes, start_time))
-        stdout.flush()
-        stdout.write("bestmove {}\n".format(move))
-        stdout.flush() 
-    else:
-        stdout.write(uci_output(move, guess, d, nodes, start_time))
-        stdout.flush()
-        stdout.write("bestmove {}\n".format(move))
-        stdout.flush()
+        move, score, d, nodes, start_time = results[-1]
+    stdout.write(uci_output(move, score, d, nodes, start_time))
+    stdout.flush()
+    stdout.write("bestmove {}\n".format(move))
+    stdout.flush()
 
-    return (move, guess)
+    return (move, score)
     
     
 def cpu_move(board, depth, movetime = INF, stop = lambda: False):
@@ -216,7 +230,8 @@ def cpu_move(board, depth, movetime = INF, stop = lambda: False):
         return move
 
     move = iterative_deepening(board, depth, movetime, stop)[0]
-
+    
+    ttable.clear() # TODO choose replacement strategy
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     
     return move
