@@ -24,9 +24,11 @@ Alternatively, you can save the engine as an executable and run with any chess G
 ------
 
 ## Current Features
-- Fail soft alpha-beta negamax search (in an iterative deepneing framework)
+- Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
 - Transposition table
+- MTD(f) search
+- Iterative deepening
 - Quiescence search
 - Null move pruning
 - Late move reduction
@@ -42,7 +44,11 @@ Alternatively, you can save the engine as an executable and run with any chess G
 
 ------
 2/21/22 v1.8.1
-> Committed Disservin's UCI bug fixes. Fixed bug where evaluation does not detect mate.
+> Committed Disservin's UCI bug fixes.
+> 
+> Optimized quiescence search to only generate captures instead of all pieces.
+> 
+> Reimplemented MTD(f).
 
 ## Devlog
 2/20/22 v1.8
