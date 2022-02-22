@@ -43,6 +43,8 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - UCI-compatibility
 
 ------
+
+## Devlog
 2/21/22 v1.8.1
 > Committed Disservin's UCI bug fixes.
 > 
@@ -50,7 +52,6 @@ Alternatively, you can save the engine as an executable and run with any chess G
 > 
 > Reimplemented MTD(f).
 
-## Devlog
 2/20/22 v1.8
 > Rewrote the evaluation function again with the innovation of bitboards, laying the groundwork for evaluation improvements.
 > 
