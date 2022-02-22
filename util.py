@@ -23,7 +23,7 @@ INF = float("inf")
 MATE_SCORE = 99999
 
 # Tables
-ttable = {} # Transposition table
+ttable = {} # Transposition table # TODO tt replacement strategy
 htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # History heuristic table [side to move][move from][move to]
 
 # UCI
