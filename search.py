@@ -217,8 +217,6 @@ def cpu_move(board, depth, movetime = INF, stop = lambda: False):
 
     move = iterative_deepening(board, depth, movetime, stop)[0]
 
-    if board.is_irreversible(move): # Reset transposition table
-        ttable.clear()
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     
     return move
