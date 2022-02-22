@@ -19,7 +19,7 @@ Through `main.ipynb`, you can run the engine with a Jupyter Notebook. Input take
 Alternatively, you can save the engine as an executable and run with any chess GUI through `uci.py`. An installation of the `python-chess` module is not necessary if you use this method.
 > pip install pyinstaller
 > 
-> pyinstaller --onefile --workpath ./build --distpath ./build --specpath ./build -n not-magnus uci.py
+> pyinstaller --onefile --workpath ../build --distpath ../build --specpath ../build -n not-magnus uci.py
 
 ------
 
