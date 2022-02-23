@@ -3,7 +3,7 @@ UCI-compatible learner classical chess engine. The goal of this project is to fi
 
 Special note of appreciation to the Chess Programming Wiki and Jeroen Carolus for his thesis "Alpha-Beta with Sibling Prediction Pruning in Chess." I wouldn't be anywhere without their help.
 
-## Installation and Usage
+## Installation and Use
 Requires the `python-chess` module:
 > pip install chess
 
@@ -27,7 +27,6 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - Fail soft alpha-beta negamax search
 - Move ordering enhancement (with history heuristic)
 - Transposition table
-- MTD(f) search
 - Iterative deepening
 - Quiescence search
 - Null move pruning
@@ -45,12 +44,13 @@ Alternatively, you can save the engine as an executable and run with any chess G
 ------
 
 ## Devlog
+2/22/22 v1.8.2
+> Slight modifications to the transposition table to reduce the number of replacements necessary with every search call.
+
 2/21/22 v1.8.1
 > Committed Disservin's UCI bug fixes.
 > 
 > Optimized quiescence search to only generate captures instead of all pieces.
-> 
-> Reimplemented MTD(f).
 
 2/20/22 v1.8
 > Rewrote the evaluation function again with the innovation of bitboards, laying the groundwork for evaluation improvements.
