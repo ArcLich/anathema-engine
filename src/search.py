@@ -56,7 +56,6 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
     key = chess.polyglot.zobrist_hash(board) #TODO generating new hash every time instead of incrementing is expensive
     tt_move = None
-    old_alpha = alpha
 
     # # Search for position in the transposition table
     if key in ttable:
@@ -64,7 +63,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
         if tt_depth >= depth:
             nodes += 1
             if flag == "EXACT":
-                alpha = tt_score
+                return (tt_move, tt_score)
             elif flag == "LOWERBOUND":
                 alpha = max(alpha, tt_score)
             elif flag == "UPPERBOUND":
@@ -72,17 +71,9 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             if alpha >= beta:
                 return (tt_move, tt_score)
 
+    old_alpha = alpha
     if depth <= 0 or board.is_game_over(claim_draw = True): # TODO optimize draw by repition detection, tt draw result
         score = qsearch(board, alpha, beta, movetime, stop)
-
-        # Add position to the transposition table
-        if score <= old_alpha:
-            ttable[key] = (depth, None, score, "UPPERBOUND")
-        elif score >= beta:
-            ttable[key] = (depth, None, score, "LOWERBOUND")
-        else:
-            ttable[key] = (depth, None, score, "EXACT")
-
         return (None, score)
     else:
         # Null move pruning
@@ -131,12 +122,12 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
                 break
         
         # Add position to the transposition table
+        tt_flag = "EXACT"
         if best_score <= old_alpha:
-            ttable[key] = (depth, best_move, best_score, "UPPERBOUND")
+            tt_flag = "UPPERBOUND"
         elif best_score >= beta:
-            ttable[key] = (depth, best_move, best_score, "LOWERBOUND")
-        else:
-            ttable[key] = (depth, best_move, best_score, "EXACT")
+            tt_flag = "LOWERBOUND"
+        ttable[key] = (depth, best_move, best_score, tt_flag)
 
         return (best_move, best_score)
 
@@ -146,8 +137,8 @@ def MTDf(board, depth, guess, movetime = INF, stop = lambda: False):
     Searches the possible moves using negamax by zooming in on the window
     Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
     """
-    upperbound = INF
-    lowerbound = -INF
+    upperbound = MATE_SCORE
+    lowerbound = -MATE_SCORE
     while (lowerbound < upperbound):
         if guess == lowerbound:
             beta = guess + 1
@@ -176,7 +167,7 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
         if can_exit_search(movetime, stop, start_time):
             break
 
-        move, score = MTDf(board, d, 0, movetime, stop) # TODO further testing: Keeping guess at 0 is faster?
+        move, score = negamax(board, d, -MATE_SCORE, MATE_SCORE, movetime, stop)
 
         if not can_exit_search(movetime, stop, start_time):
             stdout.write(uci_output(move, score, d, nodes, start_time))

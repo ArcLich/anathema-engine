@@ -235,7 +235,7 @@ def evaluate(board):
     psqt_score = (psqt_mg_score * mg_phase + psqt_eg_score * eg_phase) / total_phase
 
     # Mobility evaluation
-    mobility_score = len(list(board.legal_moves))
+    mobility_score = len(list(board.legal_moves)) # TODO very expensive
     
     # Totaling scores
     material_weight = 10

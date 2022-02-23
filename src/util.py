@@ -98,13 +98,13 @@ def null_move_ok(board):
     Returns true if conditions are met to perform null move pruning
     Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
     """
-    endgame_threshold = 14
+    endgame_threshold = 14 # TODO adjust threshold
     if (board.move_stack and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
         return False
     return True
 
 
-def reduction_ok(board, move): # TODO Might cause loss of elo
+def reduction_ok(board, move):
     """
     Returns true if conditions are met to perform late move reduction
     Returns false if move:
