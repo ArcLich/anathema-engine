@@ -44,6 +44,9 @@ Alternatively, you can save the engine as an executable and run with any chess G
 ------
 
 ## Devlog
+2/28/22 v1.8.3
+> Started using custom game over detection (checkmate, stalemate, draw by threefold repetition, draw by fifty-move rule, or draw by insufficient material) instead of using built-ins.
+
 2/22/22 v1.8.2
 > Slight modifications to the transposition table to reduce the number of replacements necessary with every search call.
 
