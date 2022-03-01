@@ -225,9 +225,10 @@ def is_threefold_repetition(board):
 def is_game_over(board):
     """
     Checks if the game is over by checkmate, stalemate,
-    threefold repetition, or the fifty-move rule
+    threefold repetition, fifty-move rule, or insufficient material
     """
-    if board.is_checkmate() or board.is_stalemate() or is_threefold_repetition(board) or board.halfmove_clock >= 100:
+    if board.is_checkmate() or board.is_stalemate() or is_threefold_repetition(board) \
+        or board.halfmove_clock >= 100 or board.is_insufficient_material():
         return True
     return False
     
