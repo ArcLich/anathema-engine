@@ -102,7 +102,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             if key in rtable:
                 rtable[key] += 1
             else:
-                rtable[key] = 0
+                rtable[key] = 1
             
             # Late move reduction
             late_move_depth_reduction = 0

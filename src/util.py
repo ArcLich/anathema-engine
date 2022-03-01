@@ -217,7 +217,7 @@ def is_threefold_repetition(board):
     """
     key = board._transposition_key()
     if key in rtable:
-        if rtable[key] >= 2: # TODO seems to work at 2 instead of 3
+        if rtable[key] >= 3:
             return True
     return False
 
