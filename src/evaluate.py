@@ -6,8 +6,8 @@ Evaluation functions which score a given position
 """
 import os
 import chess.gaviota
-from util import *
 from piece_squares_tables import *
+from util import *
 
 
 def eval_endgame(board):
@@ -57,6 +57,16 @@ def evaluate(board):
     - fine tune weights (Texel's tuning method)
     - king pawn tropism
     - different scores for mg, eg
+    -- adjust rook open file in endgame
+    - bonus to rooks behind pawns?
+    - fix habit of trapping bishop
+    - space?
+    - center control?
+    - pawn structure?
+    -- pawn storm
+    - remove weights
+    - penalty to rooks trapped by king
+    - king safety (castling, pawn shield)
     """
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         return eval_endgame(board)

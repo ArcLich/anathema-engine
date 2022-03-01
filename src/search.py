@@ -4,9 +4,8 @@ Learner classical chess engine by Devin Zhang
 
 Search functions which navigate the game tree
 """
-import chess.polyglot
-from evaluate import *
 from sys import stdout
+from evaluate import *
 
 
 def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
@@ -47,14 +46,15 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
     TODO
     - parallel search
-    - extensions?
+    - check extensions
+    - BUG: avoiding mate??
     """
     global nodes
     
     if can_exit_search(movetime, stop, start_time):
         return (None, 0)
 
-    key = chess.polyglot.zobrist_hash(board) #TODO generating new hash every time instead of incrementing is expensive
+    key = board._transposition_key()
     tt_move = None
 
     # # Search for position in the transposition table
@@ -72,7 +72,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
                 return (tt_move, tt_score)
 
     old_alpha = alpha
-    if depth <= 0 or board.is_game_over(claim_draw = True): # TODO optimize draw by repition detection, tt draw result
+    if depth <= 0 or is_game_over(board): # TODO tt draw result
         score = qsearch(board, alpha, beta, movetime, stop)
         return (None, score)
     else:
@@ -97,6 +97,12 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
         for move in moves:
             board.push(move)
+
+            # Append to threefold repetition table
+            if key in rtable:
+                rtable[key] += 1
+            else:
+                rtable[key] = 0
             
             # Late move reduction
             late_move_depth_reduction = 0
@@ -106,8 +112,12 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
                 late_move_depth_reduction = 1
 
             score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha, movetime, stop)[1]
-            board.pop()
             moves_searched += 1
+
+            board.pop()
+
+            # Remove from threefold repetition table
+            rtable[key] -= 1
 
             if score > best_score:
                 best_move = move
@@ -130,26 +140,6 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
         ttable[key] = (depth, best_move, best_score, tt_flag)
 
         return (best_move, best_score)
-
-
-def MTDf(board, depth, guess, movetime = INF, stop = lambda: False):
-    """
-    Searches the possible moves using negamax by zooming in on the window
-    Psuedocode from Aske Plaat, Jonathan Schaeffer, Wim Pijls, and Arie de Bruin
-    """
-    upperbound = MATE_SCORE
-    lowerbound = -MATE_SCORE
-    while (lowerbound < upperbound):
-        if guess == lowerbound:
-            beta = guess + 1
-        else:
-            beta = guess
-        move, guess = negamax(board, depth, beta - 1, beta, movetime, stop)
-        if guess < beta:
-            upperbound = guess
-        else:
-            lowerbound = guess
-    return (move, guess)
         
 
 def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
@@ -218,11 +208,22 @@ def cpu_move(board, depth, movetime = INF, stop = lambda: False):
             board.pop()
             evals.append((move, score))
         move = max(evals, key = lambda eval : eval[1])[0]
+
+        # Append to threefold repetition table
+        board.push(move)
+        rtable[board._transposition_key()] += 1
+        board.pop()
+
         return move
 
     move = iterative_deepening(board, depth, movetime, stop)[0]
     
-    ttable.clear() # TODO choose replacement strategy
+    ttable.clear()
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
     
+    # Append to threefold repetition table
+    board.push(move)
+    rtable[board._transposition_key()] += 1
+    board.pop()
+
     return move

@@ -4,10 +4,10 @@ Classical chess engine by Devin Zhang
 
 Helper functions, tables, constants, and globals used throughout the program
 """
-import chess
-import chess.svg
-import IPython.display
 import time
+import chess
+import IPython.display
+from chess.svg import board
 
 
 # Options
@@ -23,8 +23,9 @@ INF = float("inf")
 MATE_SCORE = 99999
 
 # Tables
-ttable = {} # Transposition table # TODO tt replacement strategy
+ttable = {} # Transposition table
 htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # History heuristic table [side to move][move from][move to]
+rtable = {} # Draw by repetition table
 
 # UCI
 nodes = 0 # Number of positions considered
@@ -90,7 +91,7 @@ def get_num_pieces(board):
     """
     Get the number of pieces of all types and color on the board.
     """
-    return len(board.piece_map())
+    return len(chess.SquareSet(board.occupied))
 
 
 def null_move_ok(board):
@@ -128,8 +129,7 @@ def get_square_color(square):
     """
     if (square % 8) % 2 == (square // 8) % 2:
         return chess.BLACK
-    else:
-        return chess.WHITE
+    return chess.WHITE
 
 
 def is_square_a_file(square):
@@ -154,18 +154,20 @@ def uci_output(move, score, depth, nodes, time_search):
     time_diff = time_now - time_search
     try:
         return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n"\
-            .format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+            .format(depth, int(score), nodes, int(nodes / (time_diff * 10**-9)), int(time_diff * 10**-6), move)
     except ZeroDivisionError:
         time_diff = 0.1
         return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n"\
-            .format(depth, int(score), nodes, int(nodes/(time_diff*10**-9)), int(time_diff*10**-6), move)
+            .format(depth, int(score), nodes, int(nodes / (time_diff * 10**-9)), int(time_diff * 10**-6), move)
 
 
 def can_exit_search(movetime, stop, start_time):
     """
     Returns true if stop command given or too much time elapsed on search
     """
-    return stop() or (movetime - (time.time_ns() - start_time) * 10**-6) <= 0
+    if stop() or (movetime - (time.time_ns() - start_time) * 10**-6) <= 0:
+        return True
+    return False
 
 
 def get_bb_king_zone(square, color):
@@ -185,7 +187,7 @@ def get_bb_king_zone(square, color):
         if square - 8 >= 0:
             king_back_rank = chess.BB_RANKS[chess.square_rank(square) - 1]
             bb_king_ranks |= chess.SquareSet(king_back_rank)
-    elif color == chess.BLACK:
+    else:
         if square - 8 >= 0:
             king_forward_rank = chess.BB_RANKS[chess.square_rank(square) - 1]
             bb_king_ranks |= chess.SquareSet(king_forward_rank)
@@ -207,4 +209,25 @@ def get_bb_king_zone(square, color):
 
     bb_king_zone = bb_king_ranks & bb_king_files
     return bb_king_zone
+
+
+def is_threefold_repetition(board):
+    """
+    Checks if the game is over by threefold repetition
+    """
+    key = board._transposition_key()
+    if key in rtable:
+        if rtable[key] >= 2: # TODO seems to work at 2 instead of 3
+            return True
+    return False
+
+
+def is_game_over(board):
+    """
+    Checks if the game is over by checkmate, stalemate,
+    threefold repetition, or the fifty-move rule
+    """
+    if board.is_checkmate() or board.is_stalemate() or is_threefold_repetition(board) or board.halfmove_clock >= 100:
+        return True
+    return False
     
