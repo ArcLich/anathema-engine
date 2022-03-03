@@ -31,6 +31,7 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - Quiescence search
 - Null move pruning
 - Late move reduction
+- Check extensions
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
@@ -44,6 +45,13 @@ Alternatively, you can save the engine as an executable and run with any chess G
 ------
 
 ## Devlog
+3/2/22 v1.9
+> Added search extensions for checks.
+> 
+> Fixed additional issue where the engine was avoiding delivering checkmate, only playing M1 but never M0, due to not differentiating between the speed for mate in the transposition table.
+> 
+> General code cleanups. 
+
 2/28/22 v1.8.3
 > Started using custom game over detection (checkmate, stalemate, draw by threefold repetition, draw by fifty-move rule, or draw by insufficient material) instead of using built-ins.
 
