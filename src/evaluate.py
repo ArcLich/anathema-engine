@@ -68,11 +68,14 @@ def evaluate(board):
     - penalty to rooks trapped by king
     - king safety (castling, pawn shield)
     """
+    game_state = get_game_state(board)
+    if game_state == 1: # Game is checkmate
+        return -MATE_SCORE
+    elif 2 <= game_state <= 5: # Game is drawn
+        return 0
+
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         return eval_endgame(board)
-
-    if board.is_checkmate():
-        return -MATE_SCORE
     
     material_values = [100, 320, 330, 500, 900, MATE_SCORE]
     mg_psqts = {
@@ -255,6 +258,7 @@ def evaluate(board):
     score = (material_weight * material_score) \
             + (psqt_weight * psqt_score) \
             + (mobility_weight * mobility_score) \
-            + (piece_specific_weight * piece_specific_score)
+            + (piece_specific_weight * piece_specific_score) \
+            + 1 # Add one so evaluations of 0 are not confused with draw scores
     return score
         

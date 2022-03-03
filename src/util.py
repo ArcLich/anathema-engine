@@ -105,7 +105,7 @@ def null_move_ok(board):
     return True
 
 
-def reduction_ok(board, move):
+def reduction_ok(board, depth, move, moves_searched, has_failed_high):
     """
     Returns true if conditions are met to perform late move reduction
     Returns false if move:
@@ -114,9 +114,13 @@ def reduction_ok(board, move):
     - Gives check
     - Is made while in check
     """
+    full_depth_moves_threshold = 4 # Minimum number of moves to search at full depth
+    reduction_threshold = 3 # Maximum depth to reduce at
+
     result = True
     board.pop()
-    if board.is_capture(move) or move.promotion or board.gives_check(move) or board.is_check():
+    if moves_searched < full_depth_moves_threshold or has_failed_high == True or depth < reduction_threshold \
+        or board.is_capture(move) or move.promotion or board.gives_check(move) or board.is_check():
         result = False
     board.push(move)
     return result
@@ -152,6 +156,7 @@ def uci_output(move, score, depth, nodes, time_search):
     """
     time_now = time.time_ns()
     time_diff = time_now - time_search
+
     try:
         return "info depth {} score cp {} nodes {} nps {} time {} pv {} \n"\
             .format(depth, int(score), nodes, int(nodes / (time_diff * 10**-9)), int(time_diff * 10**-6), move)
@@ -222,13 +227,34 @@ def is_threefold_repetition(board):
     return False
 
 
+def get_game_state(board):
+    """
+    Returns a number based on how the game has ended:
+    - Game not ended: 0
+    - Checkmate: 1
+    - Stalemate: 2
+    - Draw (by threefold repetition): 3
+    - Draw (by fifty-move rule): 4
+    - Draw (by insufficient material): 5
+    """
+    if board.is_checkmate():
+        return 1
+    if board.is_stalemate():
+        return 2
+    if is_threefold_repetition(board):
+        return 3
+    if board.halfmove_clock >= 100:
+        return 4
+    if board.is_insufficient_material():
+        return 5
+    return 0
+
+
 def is_game_over(board):
     """
     Checks if the game is over by checkmate, stalemate,
     threefold repetition, fifty-move rule, or insufficient material
     """
-    if board.is_checkmate() or board.is_stalemate() or is_threefold_repetition(board) \
-        or board.halfmove_clock >= 100 or board.is_insufficient_material():
-        return True
-    return False
-    
+    if get_game_state(board) == 0:
+        return False
+    return True

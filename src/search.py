@@ -15,7 +15,7 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     global nodes
     
     if can_exit_search(movetime, stop, start_time):
-        return 0
+        return -INF
 
     stand_pat = evaluate(board)
     nodes += 1
@@ -34,6 +34,7 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
         if score >= beta:
             return beta
         alpha = max(alpha, score)
+
     return alpha
 
 
@@ -46,19 +47,19 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
     TODO
     - parallel search
-    - check extensions
-    - BUG: avoiding mate??
+    - razoring
+    - futility pruning
     """
     global nodes
     
     if can_exit_search(movetime, stop, start_time):
-        return (None, 0)
+        return (None, -INF)
 
     key = board._transposition_key()
     tt_move = None
 
-    # # Search for position in the transposition table
-    if key in ttable:
+    # Search for position in the transposition table
+    if key in ttable: # TODO draw score in tt_table by repetition
         tt_depth, tt_move, tt_score, flag = ttable[key]
         if tt_depth >= depth:
             nodes += 1
@@ -72,7 +73,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
                 return (tt_move, tt_score)
 
     old_alpha = alpha
-    if depth <= 0 or is_game_over(board): # TODO tt draw result
+    if depth <= 0 or is_game_over(board):
         score = qsearch(board, alpha, beta, movetime, stop)
         return (None, score)
     else:
@@ -82,20 +83,25 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             board.push(chess.Move.null())
             score = -negamax(board, depth - 1 - null_move_depth_reduction, -beta, -beta + 1, movetime, stop)[1]
             board.pop()
+            nodes -= 1
             if score >= beta:
                 return (None, score)
 
         # Alpha-beta negamax
-        score = 0
+        score = -INF
         best_move = None
         best_score = -INF
         moves = list(board.legal_moves)
         moves.sort(key = lambda move : rate(board, move, tt_move), reverse = True)
 
         moves_searched = 0
-        failed_high = False
+        has_failed_high = False
 
         for move in moves:
+            # Check extension
+            if board.gives_check(move):
+                depth += 1
+
             board.push(move)
 
             # Append to threefold repetition table
@@ -106,9 +112,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             
             # Late move reduction
             late_move_depth_reduction = 0
-            full_depth_moves_threshold = 4
-            reduction_threshold = 3
-            if moves_searched >= full_depth_moves_threshold and failed_high == False and depth >= reduction_threshold and reduction_ok(board, move):
+            if reduction_ok(board, depth, move, moves_searched, has_failed_high):
                 late_move_depth_reduction = 1
 
             score = -negamax(board, depth - 1 - late_move_depth_reduction, -beta, -alpha, movetime, stop)[1]
@@ -126,17 +130,23 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             alpha = max(alpha, best_score)
 
             if alpha >= beta: # Beta cut-off (fails high)
-                failed_high = True
+                has_failed_high = True
                 if not board.is_capture(move):
                     htable[board.piece_at(move.from_square).color][move.from_square][move.to_square] += depth**2 # Update history heuristic table
                 break
         
-        # Add position to the transposition table
-        tt_flag = "EXACT"
+        # Add position to the transposition tables
         if best_score <= old_alpha:
             tt_flag = "UPPERBOUND"
         elif best_score >= beta:
             tt_flag = "LOWERBOUND"
+        else:
+            tt_flag = "EXACT"
+
+        # Increment mate score by depth so ie M1 is preferred over M2
+        if score <= -99999:
+            best_score += depth
+
         ttable[key] = (depth, best_move, best_score, tt_flag)
 
         return (best_move, best_score)
@@ -144,13 +154,14 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
 def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     """
-    Approaches the desired depth in steps using MTD(f)
+    Approaches the desired search depth in steps, maintaining effiency
+    with the transposition table
     """
     global nodes
     global start_time
     
     move = None
-    score = 0
+    score = -INF
     results = []
     d = 0
     for d in range(1, depth + 1):
@@ -166,6 +177,8 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
 
     if results:
         move, score, d, nodes, start_time = results[-1]
+
+    # Print out info
     stdout.write(uci_output(move, score, d, nodes, start_time))
     stdout.flush()
     stdout.write("bestmove {}\n".format(move))
@@ -211,19 +224,21 @@ def cpu_move(board, depth, movetime = INF, stop = lambda: False):
 
         # Append to threefold repetition table
         board.push(move)
-        rtable[board._transposition_key()] += 1
+        if board._transposition_key() in rtable:
+            rtable[board._transposition_key()] += 1
         board.pop()
 
         return move
 
     move = iterative_deepening(board, depth, movetime, stop)[0]
-    
+
     ttable.clear()
     htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # Reset history heuristic table
-    
+
     # Append to threefold repetition table
     board.push(move)
-    rtable[board._transposition_key()] += 1
+    if board._transposition_key() in rtable:
+        rtable[board._transposition_key()] += 1
     board.pop()
 
     return move
