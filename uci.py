@@ -2,14 +2,14 @@
 Not Magnus
 Classical chess engine by Devin Zhang
 
-UCI communication file
+UCI communication file by Disservin
 """
 from sys import stdout
 from threading import Thread
 from search import *
 
 
-def main():
+def main(): # TODO automatic time controls
     stack = []
     out = stdout
     stop_threads = False

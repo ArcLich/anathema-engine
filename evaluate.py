@@ -15,7 +15,7 @@ def eval_endgame(board):
     Evaluates an endgame position with 5 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
     """
-    with chess.gaviota.open_tablebase(os.path.dirname(os.getcwd()) + ENDGAME_BOOK_LOCATION) as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
+    with chess.gaviota.open_tablebase(os.path.dirname(os.path.realpath(__file__)) + ENDGAME_BOOK_LOCATION) as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
         if board.is_checkmate():
             return INF
         score = tablebase.get_dtm(board) * MATE_SCORE
@@ -54,7 +54,10 @@ def evaluate(board):
     King threat table values from Stockfish
 
     TODO
+    - speed optimizations
+    -- king attack zone is expensive to compute
     - fine tune weights (Texel's tuning method)
+    - pawn hash table
     - king pawn tropism
     - different scores for mg, eg
     -- adjust rook open file in endgame
@@ -171,10 +174,10 @@ def evaluate(board):
                     passed_pawn_bonus = [0, 5, 10, 20, 40, 80, 160, 0]
                     pawn_file = chess.BB_FILES[chess.square_file(square)]
                     bb_passing_files = chess.SquareSet(pawn_file)
-                    if not is_square_a_file(square):
+                    if not is_square_A_file(square):
                         pawn_left_file = chess.BB_FILES[chess.square_file(square - 1)]
                         bb_passing_files |= chess.SquareSet(pawn_left_file)
-                    if not is_square_h_file(square):
+                    if not is_square_H_file(square):
                         pawn_right_file = chess.BB_FILES[chess.square_file(square + 1)]
                         bb_passing_files |= chess.SquareSet(pawn_right_file)
                     if len(bb_passing_files & bitboards[not color][chess.PAWN][1]) == 0:

@@ -11,12 +11,12 @@ from chess.svg import board
 
 
 # Options
-START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
-DEPTH = 4 # Search depth, minimum 1
+START_AS = "COMPUTER" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
+DEPTH = 3 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = False # Use endgame book?
-OPENING_BOOK_LOCATION = "Opening Book/Book.bin"
-ENDGAME_BOOK_LOCATION = "Endgame Book"
+OPENING_BOOK_LOCATION = "/Opening Book/Book.bin"
+ENDGAME_BOOK_LOCATION = "/Endgame Book"
 
 # Constants
 INF = float("inf")
@@ -109,10 +109,10 @@ def reduction_ok(board, depth, move, moves_searched, has_failed_high):
     """
     Returns true if conditions are met to perform late move reduction
     Returns false if move:
-    - Is a capture
-    - Is a promotion
-    - Gives check
-    - Is made while in check
+    - is a capture
+    - is a promotion
+    - gives check
+    - is made while in check
     """
     full_depth_moves_threshold = 4 # Minimum number of moves to search at full depth
     reduction_threshold = 3 # Maximum depth to reduce at
@@ -136,14 +136,14 @@ def get_square_color(square):
     return chess.WHITE
 
 
-def is_square_a_file(square):
+def is_square_A_file(square):
     """
     Returns true if the square is on the A file
     """
     return square % 8 == 0
 
 
-def is_square_h_file(square):
+def is_square_H_file(square):
     """
     Returns true if the square is on the H file
     """
@@ -205,10 +205,10 @@ def get_bb_king_zone(square, color):
 
     king_file = chess.BB_FILES[chess.square_file(square)]
     bb_king_files = chess.SquareSet(king_file)
-    if not is_square_a_file(square):
+    if not is_square_A_file(square):
         king_left_file = chess.BB_FILES[chess.square_file(square - 1)]
         bb_king_files |= chess.SquareSet(king_left_file)
-    if not is_square_h_file(square):
+    if not is_square_H_file(square):
         king_right_file = chess.BB_FILES[chess.square_file(square + 1)]
         bb_king_files |= chess.SquareSet(king_right_file)
 

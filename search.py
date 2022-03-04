@@ -15,25 +15,38 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     global nodes
     
     if can_exit_search(movetime, stop, start_time):
-        return -INF
+        return 0
 
-    stand_pat = evaluate(board)
-    nodes += 1
-    
-    if stand_pat >= beta:
-        return beta
-    alpha = max(alpha, stand_pat)
-    
-    captures = list(board.generate_legal_captures())
-    captures.sort(key = lambda move : rate(board, move, None), reverse = True)
-    for capture in captures:
-        board.push(capture)
-        score = -qsearch(board, -beta, -alpha, movetime, stop)
-        board.pop()
-
-        if score >= beta:
+    if not board.is_check():
+        stand_pat = evaluate(board)
+        nodes += 1
+        
+        if stand_pat >= beta:
             return beta
-        alpha = max(alpha, score)
+        alpha = max(alpha, stand_pat)
+    
+    # captures = list(board.generate_legal_captures())
+    # captures.sort(key = lambda move : rate(board, move, None), reverse = True) # TODO maybe unnecessary
+    # for capture in captures:
+    #     board.push(capture)
+    #     score = -qsearch(board, -beta, -alpha, movetime, stop)
+    #     board.pop()
+
+    #     if score >= beta:
+    #         return beta
+    #     alpha = max(alpha, score)
+
+    moves = list(board.generate_legal_moves())
+    moves.sort(key = lambda move : rate(board, move, None), reverse = True)
+    for move in moves:
+        if board.gives_check(move) or board.is_capture(move):
+            board.push(move)
+            score = -qsearch(board, -beta, -alpha, movetime, stop)
+            board.pop()
+
+            if score >= beta:
+                return beta
+            alpha = max(alpha, score)
 
     return alpha
 
@@ -49,11 +62,12 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
     - parallel search
     - razoring
     - futility pruning
+    - double null move zugzwang detection?
     """
     global nodes
     
     if can_exit_search(movetime, stop, start_time):
-        return (None, -INF)
+        return (None, 0)
 
     key = board._transposition_key()
     tt_move = None
@@ -98,10 +112,6 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
         has_failed_high = False
 
         for move in moves:
-            # Check extension
-            if board.gives_check(move):
-                depth += 1
-
             board.push(move)
 
             # Append to threefold repetition table
@@ -144,7 +154,7 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
             tt_flag = "EXACT"
 
         # Increment mate score by depth so ie M1 is preferred over M2
-        if score <= -99999:
+        if best_score <= -MATE_SCORE: # TODO play into longest mating sequence if on losing side?
             best_score += depth
 
         ttable[key] = (depth, best_move, best_score, tt_flag)
@@ -206,7 +216,7 @@ def cpu_move(board, depth, movetime = INF, stop = lambda: False):
 
     if OPENING_BOOK:
         try:
-            with chess.polyglot.open_reader(os.path.dirname(os.getcwd()) + OPENING_BOOK_LOCATION) as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
+            with chess.polyglot.open_reader(os.path.dirname(os.path.realpath(__file__)) + OPENING_BOOK_LOCATION) as opening_book: # https://sourceforge.net/projects/codekiddy-chess/files/
                 opening = opening_book.choice(board)
                 opening_book.close()
                 return opening.move
