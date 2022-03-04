@@ -42,12 +42,13 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - UCI-compatibility
 
 ------
+
+## Devlog
 3/3/22 v1.9.1
 > Fixed bug where check extension will run in an infinite loop in certain positions.
 > 
 > Fixed bug where the search was mistakingly playing null moves repeatedly with null move pruning.
 
-## Devlog
 3/2/22 v1.9
 > Added search extensions for checks.
 > 
