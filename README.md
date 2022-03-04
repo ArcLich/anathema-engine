@@ -28,10 +28,9 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - Move ordering enhancement (with history heuristic)
 - Transposition table
 - Iterative deepening
-- Quiescence search
+- Quiescence search (with check extensions)
 - Null move pruning
 - Late move reduction
-- Check extensions
 - Opening book
 - Gaviota endgame tablebase
 - Material score evaluation
@@ -43,6 +42,10 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - UCI-compatibility
 
 ------
+3/3/22 v1.9.1
+> Fixed bug where check extension will run in an infinite loop in certain positions.
+> 
+> Fixed bug where the search was mistakingly playing null moves repeatedly with null move pruning.
 
 ## Devlog
 3/2/22 v1.9
