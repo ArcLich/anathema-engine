@@ -10,7 +10,8 @@ from evaluate import *
 
 def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     """
-    Quiescence search to extend search depth until there are no more captures
+    Quiescence search to extend search depth until
+    there are no more captures or checks
     """
     global nodes
     
@@ -24,17 +25,6 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
         if stand_pat >= beta:
             return beta
         alpha = max(alpha, stand_pat)
-    
-    # captures = list(board.generate_legal_captures())
-    # captures.sort(key = lambda move : rate(board, move, None), reverse = True) # TODO maybe unnecessary
-    # for capture in captures:
-    #     board.push(capture)
-    #     score = -qsearch(board, -beta, -alpha, movetime, stop)
-    #     board.pop()
-
-    #     if score >= beta:
-    #         return beta
-    #     alpha = max(alpha, score)
 
     moves = list(board.generate_legal_moves())
     moves.sort(key = lambda move : rate(board, move, None), reverse = True)
@@ -60,9 +50,6 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
 
     TODO
     - parallel search
-    - razoring
-    - futility pruning
-    - double null move zugzwang detection?
     """
     global nodes
     

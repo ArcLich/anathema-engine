@@ -10,6 +10,71 @@ from piece_squares_tables import *
 from util import *
 
 
+def is_square_A_file(square):
+    """
+    Returns true if the square is on the A file
+    """
+    return square % 8 == 0
+
+
+def is_square_H_file(square):
+    """
+    Returns true if the square is on the H file
+    """
+    return (square + 1) % 8 == 0
+
+
+def get_bb_king_zone(square, color):
+    """
+    Gets the king zone (the ring around the king plus 3 more squares facing the enemy)
+    bitboard for the given side
+    """
+    king_rank = chess.BB_RANKS[chess.square_rank(square)]
+    bb_king_ranks = chess.SquareSet(king_rank)
+    if color == chess.WHITE:
+        if square + 8 <= 63:
+            king_forward_rank = chess.BB_RANKS[chess.square_rank(square) + 1]
+            bb_king_ranks |= chess.SquareSet(king_forward_rank)
+            if square + 16 <= 63:
+                king_forward_rank = chess.BB_RANKS[chess.square_rank(square) + 2]
+                bb_king_ranks |= chess.SquareSet(king_forward_rank)
+        if square - 8 >= 0:
+            king_back_rank = chess.BB_RANKS[chess.square_rank(square) - 1]
+            bb_king_ranks |= chess.SquareSet(king_back_rank)
+    else:
+        if square - 8 >= 0:
+            king_forward_rank = chess.BB_RANKS[chess.square_rank(square) - 1]
+            bb_king_ranks |= chess.SquareSet(king_forward_rank)
+            if square - 16 >= 0:
+                king_forward_rank = chess.BB_RANKS[chess.square_rank(square) - 2]
+                bb_king_ranks |= chess.SquareSet(king_forward_rank)
+        if square + 8 <= 63:
+            king_back_rank = chess.BB_RANKS[chess.square_rank(square) + 1]
+            bb_king_ranks |= chess.SquareSet(king_back_rank)
+
+    king_file = chess.BB_FILES[chess.square_file(square)]
+    bb_king_files = chess.SquareSet(king_file)
+    if not is_square_A_file(square):
+        king_left_file = chess.BB_FILES[chess.square_file(square - 1)]
+        bb_king_files |= chess.SquareSet(king_left_file)
+    if not is_square_H_file(square):
+        king_right_file = chess.BB_FILES[chess.square_file(square + 1)]
+        bb_king_files |= chess.SquareSet(king_right_file)
+
+    bb_king_zone = bb_king_ranks & bb_king_files
+    return bb_king_zone
+
+
+def get_square_color(square):
+    """
+    Given a square on the board return whether
+    its a dark square or a light square
+    """
+    if (square % 8) % 2 == (square // 8) % 2:
+        return chess.BLACK
+    return chess.WHITE
+
+
 def eval_endgame(board):
     """
     Evaluates an endgame position with 5 or less pieces
@@ -124,11 +189,14 @@ def evaluate(board):
     phase = 0
     total_phase = 16*phase_scores[chess.PAWN - 1] + 4*phase_scores[chess.KNIGHT - 1] + 4*phase_scores[chess.BISHOP - 1] \
                 + 4*phase_scores[chess.ROOK - 1] + 2*phase_scores[chess.QUEEN - 1]
+    mobility_score = 0
     piece_specific_score = 0
 
     b_bitboards = [0, 0, 0, 0, 0, 0, 0]
     w_bitboards = [0, 0, 0, 0, 0, 0, 0]
     bitboards = [b_bitboards, w_bitboards]
+
+    occupied = board.occupied
 
     # Generate bitboards
     for color in [chess.WHITE, chess.BLACK]:
@@ -207,9 +275,15 @@ def evaluate(board):
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
 
+                    # Bonus to mobility by how many squares can be moved to
+                    mobility_score += count_bin(chess.BB_KNIGHT_ATTACKS[square] & ~occupied)
+
                 elif piece == chess.BISHOP:
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
+
+                    # Bonus to mobility by how many squares can be moved to
+                    mobility_score += count_bin(chess.BB_DIAG_ATTACKS[square][chess.BB_DIAG_MASKS[square] & occupied] & ~occupied)
 
                 elif piece == chess.ROOK:
                     # Bonus to rook on open file
@@ -227,6 +301,10 @@ def evaluate(board):
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 3
 
+                    # Bonus to mobility by how many squares can be moved to
+                    mobility_score += count_bin((chess.BB_RANK_ATTACKS[square][chess.BB_RANK_MASKS[square] & occupied] \
+                                               | chess.BB_FILE_ATTACKS[square][chess.BB_FILE_MASKS[square] & occupied]) & ~occupied)
+
                 elif piece == chess.QUEEN:
                     # Penalty to pinned queen
                     queen_pinned_penalty = -50
@@ -240,6 +318,11 @@ def evaluate(board):
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 5
 
+                    # Bonus to mobility by how many squares can be moved to
+                    mobility_score += count_bin((chess.BB_RANK_ATTACKS[square][chess.BB_RANK_MASKS[square] & occupied] \
+                                               | chess.BB_FILE_ATTACKS[square][chess.BB_FILE_MASKS[square] & occupied] \
+                                               | chess.BB_DIAG_ATTACKS[square][chess.BB_DIAG_MASKS[square] & occupied]) & ~occupied)
+
         # Bonus to attacks on the enemy king zone
         king_attack_units = min(king_attack_units, 61)
         piece_specific_score += king_threat_table[king_attack_units] * relative_weight
@@ -249,9 +332,6 @@ def evaluate(board):
     mg_phase = max(phase, total_phase)
     eg_phase = total_phase - mg_phase
     psqt_score = (psqt_mg_score * mg_phase + psqt_eg_score * eg_phase) / total_phase
-
-    # Mobility evaluation
-    mobility_score = len(list(board.legal_moves)) # TODO very expensive
     
     # Totaling scores
     material_weight = 10

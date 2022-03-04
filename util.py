@@ -11,8 +11,8 @@ from chess.svg import board
 
 
 # Options
-START_AS = "COMPUTER" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
-DEPTH = 3 # Search depth, minimum 1
+START_AS = "WHITE" # Human player plays as: WHITE, BLACK, or RANDOM. Put COMPUTER for CPU to play itself
+DEPTH = 4 # Search depth, minimum 1
 OPENING_BOOK = False # Use opening book?
 ENDGAME_BOOK = False # Use endgame book?
 OPENING_BOOK_LOCATION = "/Opening Book/Book.bin"
@@ -100,7 +100,7 @@ def null_move_ok(board):
     Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
     """
     endgame_threshold = 14 # TODO adjust threshold
-    if (board.move_stack and board.peek() != chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
+    if (board.ply() >= 1 and board.peek() == chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
         return False
     return True
 
@@ -126,30 +126,6 @@ def reduction_ok(board, depth, move, moves_searched, has_failed_high):
     return result
 
 
-def get_square_color(square):
-    """
-    Given a square on the board return whether
-    its a dark square or a light square
-    """
-    if (square % 8) % 2 == (square // 8) % 2:
-        return chess.BLACK
-    return chess.WHITE
-
-
-def is_square_A_file(square):
-    """
-    Returns true if the square is on the A file
-    """
-    return square % 8 == 0
-
-
-def is_square_H_file(square):
-    """
-    Returns true if the square is on the H file
-    """
-    return (square + 1) % 8 == 0
-
-
 def uci_output(move, score, depth, nodes, time_search):
     """
     Print output about the search in UCI engine communication
@@ -173,47 +149,6 @@ def can_exit_search(movetime, stop, start_time):
     if stop() or (movetime - (time.time_ns() - start_time) * 10**-6) <= 0:
         return True
     return False
-
-
-def get_bb_king_zone(square, color):
-    """
-    Gets the king zone (the ring around the king plus 3 more squares facing the enemy)
-    bitboard for the given side
-    """
-    king_rank = chess.BB_RANKS[chess.square_rank(square)]
-    bb_king_ranks = chess.SquareSet(king_rank)
-    if color == chess.WHITE:
-        if square + 8 <= 63:
-            king_forward_rank = chess.BB_RANKS[chess.square_rank(square) + 1]
-            bb_king_ranks |= chess.SquareSet(king_forward_rank)
-            if square + 16 <= 63:
-                king_forward_rank = chess.BB_RANKS[chess.square_rank(square) + 2]
-                bb_king_ranks |= chess.SquareSet(king_forward_rank)
-        if square - 8 >= 0:
-            king_back_rank = chess.BB_RANKS[chess.square_rank(square) - 1]
-            bb_king_ranks |= chess.SquareSet(king_back_rank)
-    else:
-        if square - 8 >= 0:
-            king_forward_rank = chess.BB_RANKS[chess.square_rank(square) - 1]
-            bb_king_ranks |= chess.SquareSet(king_forward_rank)
-            if square - 16 >= 0:
-                king_forward_rank = chess.BB_RANKS[chess.square_rank(square) - 2]
-                bb_king_ranks |= chess.SquareSet(king_forward_rank)
-        if square + 8 <= 63:
-            king_back_rank = chess.BB_RANKS[chess.square_rank(square) + 1]
-            bb_king_ranks |= chess.SquareSet(king_back_rank)
-
-    king_file = chess.BB_FILES[chess.square_file(square)]
-    bb_king_files = chess.SquareSet(king_file)
-    if not is_square_A_file(square):
-        king_left_file = chess.BB_FILES[chess.square_file(square - 1)]
-        bb_king_files |= chess.SquareSet(king_left_file)
-    if not is_square_H_file(square):
-        king_right_file = chess.BB_FILES[chess.square_file(square + 1)]
-        bb_king_files |= chess.SquareSet(king_right_file)
-
-    bb_king_zone = bb_king_ranks & bb_king_files
-    return bb_king_zone
 
 
 def is_threefold_repetition(board):
@@ -248,6 +183,14 @@ def get_game_state(board):
     if board.is_insufficient_material():
         return 5
     return 0
+
+
+def count_bin(num):
+    """
+    Given an integer, return how many 1s in that integer
+    in binary form
+    """
+    return bin(num).count("1")
 
 
 def is_game_over(board):

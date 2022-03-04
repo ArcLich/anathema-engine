@@ -9,7 +9,7 @@ from threading import Thread
 from search import *
 
 
-def main(): # TODO automatic time controls
+def main():
     stack = []
     out = stdout
     stop_threads = False
@@ -69,7 +69,7 @@ def main(): # TODO automatic time controls
             parameters = command.split(" ")
             depth = 255
             stop_threads = False
-            movetime = INF
+            movetime = INF # TODO time manager
             if "infinite" in parameters:
                 pass
             elif "depth" in parameters:
