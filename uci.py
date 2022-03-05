@@ -69,7 +69,7 @@ def main():
             parameters = command.split(" ")
             depth = 255
             stop_threads = False
-            movetime = INF # TODO time manager
+            movetime = 5000
             if "infinite" in parameters:
                 pass
             elif "depth" in parameters:

@@ -1,7 +1,6 @@
 """
 Not Magnus
 Classical chess engine by Devin Zhang
-
 Evaluation functions which score a given position
 """
 import os
@@ -113,7 +112,7 @@ def evaluate(board):
     - Pinned queens
     - Friendly pawns that are on the same colored square as the bishop
     - Isolated pawns
-
+    
     Material score values from Tomasz Michniewski's Simplified Evaluation Function
     Piece-squares table values and tapered evaluation from Ronald Friederich's PeSTO's Evaluation Function
     King threat table values from Stockfish
@@ -344,4 +343,3 @@ def evaluate(board):
             + (piece_specific_weight * piece_specific_score) \
             + 1 # Add one so evaluations of 0 are not confused with draw scores
     return score
-        

@@ -92,8 +92,8 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
         score = -INF
         best_move = None
         best_score = -INF
-        moves = list(board.legal_moves)
-        moves.sort(key = lambda move : rate(board, move, tt_move), reverse = True)
+        moves = board.generate_legal_moves()
+        moves = sorted(moves, key = lambda move : rate(board, move, tt_move), reverse = True)
 
         moves_searched = 0
         has_failed_high = False
