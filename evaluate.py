@@ -106,7 +106,7 @@ def evaluate(board):
     Gives bonuses to:
     - Rooks on open and semi-open files
     - Passed pawns
-    - Knights/bishops on outposts (squares on rank 4, 5, or 6 defended by a friendly pawn)
+    - Knights on outposts (squares on rank 4, 5, or 6 defended by a friendly pawn)
     - Attacks on the enemy king zone (ring around the king plus 3 forward squares towards the enemy)
     - Pawn moves that gain space
 
@@ -257,15 +257,6 @@ def evaluate(board):
                     mobility_score += count_bin(chess.BB_KNIGHT_ATTACKS[square] & ~occupied)
 
                 elif piece == chess.BISHOP:
-                    # Bonus to bishop on outpost (a square on rank 4, 5, or 6 defended by a friendly pawn)
-                    bb_pawns = bitboards[color][chess.PAWN][1]
-                    rank = chess.square_rank(square) + 1
-                    if (color == chess.WHITE and (rank == 4 or rank == 5 or rank == 6)) or \
-                        ((color == chess.BLACK) and (rank == 5 or rank == 4 or rank == 3)):
-                            if len(board.attackers(color, square) & bb_pawns) >= 1:
-                                piece_specific_mg_score += outpost_mg_bonus * relative_weight
-                                piece_specific_eg_score += outpost_eg_bonus * relative_weight
-
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
 
