@@ -38,12 +38,20 @@ Alternatively, you can save the engine as an executable and run with any chess G
 - Tapered evaluation
 - Mobility evaluation
 - Piece-specific evaluation
+- Pawn hash table
 - King safety evaluation
 - UCI-compatibility
 
 ------
 
 ## Devlog
+3/11/22 v1.10
+> Saving pawn evaluation scores to a pawn hash table so that they don't have to be recalculated.
+> 
+> Gives bonus to bishops on outpost squares.
+> 
+> Gives penalty to rooks trapped by their king.
+
 3/11/22 v1.9.3
 > Now using both middlegame and endgame evaluation values, with tapered evaluation smoothing the transition between them.
 >
