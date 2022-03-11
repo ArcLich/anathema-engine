@@ -44,6 +44,11 @@ Alternatively, you can save the engine as an executable and run with any chess G
 ------
 
 ## Devlog
+3/11/22 v1.9.3
+> Now using both middlegame and endgame evaluation values, with tapered evaluation smoothing the transition between them.
+>
+> Added rudimentary space analysis to the evaluation by simply counting the squares behind a pawn.
+
 3/10/22 v1.9.2
 > Fixed bug where check extension was causing blunders in endgame positions.
 > 
