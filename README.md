@@ -44,6 +44,9 @@ Alternatively, you can save the engine as an executable and run with any chess G
 ------
 
 ## Devlog
+3/10/22 v1.9.2
+> Fixed bug where check extension was causing blunders in endgame positions. 
+
 3/3/22 v1.9.1
 > Fixed bug where check extension will run in an infinite loop in certain positions.
 > 
