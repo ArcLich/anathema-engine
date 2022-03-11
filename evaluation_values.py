@@ -1,7 +1,6 @@
 """
 Not Magnus
 Classical chess engine by Devin Zhang
-
 The values used in evaluation
 """
 from util import *
@@ -88,14 +87,20 @@ pawn_isolated_eg_penalty = -20
 pawn_space_mg_bonus = 2
 pawn_space_eg_bonus = 1
 
-knight_outpost_mg_bonus = 31
-knight_outpost_eg_bonus = 22
+outpost_mg_bonus = 31
+outpost_eg_bonus = 22
 
 rook_open_file_mg_bonus = 47
 rook_open_file_eg_bonus = 26
 
 rook_semiopen_file_mg_bonus = 19
 rook_semiopen_file_eg_bonus = 6
+
+rook_trapped_mg_penalty = -55
+rook_trapped_eg_penalty = -13
+
+rook_trapped_nocastle_mg_penalty = -110
+rook_trapped_nocastle_eg_penalty = -26
 
 queen_pinned_mg_penalty = -50
 queen_pinned_eg_penalty = -15

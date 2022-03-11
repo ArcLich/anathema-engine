@@ -101,11 +101,12 @@ def evaluate(board):
     - Tapered evaluation
     - Mobility
     - 5-men Gaviota endgame tablebase (if toggled)
+    - Pawn hash table
 
     Gives bonuses to:
     - Rooks on open and semi-open files
     - Passed pawns
-    - Knights on outposts (squares on rank 4, 5, or 6 defended by a friendly pawn)
+    - Knights/bishops on outposts (squares on rank 4, 5, or 6 defended by a friendly pawn)
     - Attacks on the enemy king zone (ring around the king plus 3 forward squares towards the enemy)
     - Pawn moves that gain space
 
@@ -113,25 +114,14 @@ def evaluate(board):
     - Pinned queens
     - Friendly pawns that are on the same colored square as the bishop
     - Isolated pawns
+    - Rooks trapped by king, more so if king cannot castle
     
     Material score values from Tomasz Michniewski's Simplified Evaluation Function
     Tapered evaluation and piece-square table values from Ronald Friederich's PeSTO's Evaluation Function
     Other select values from Stockfish
 
     TODO
-    - speed optimizations
-    -- king attack zone is expensive to compute
-    - fine tune weights (Texel's tuning method)
-    - pawn hash table
-    - king pawn tropism
-    - bonus to rooks behind pawns?
-    - fix habit of trapping bishop
-    - center control?
-    - pawn structure?
-    -- pawn storm
-    - remove weights
-    - penalty to rooks trapped by king
-    - king safety (castling, pawn shield)
+    - fine tune weights and values (Texel's tuning method)
     """
     game_state = get_game_state(board)
     if game_state == 1: # Game is checkmate
@@ -161,6 +151,10 @@ def evaluate(board):
     piece_specific_eg_score = 0
     piece_specific_score = 0
 
+    # Part of piece specific score, saved to pawn hash table by itself
+    pawn_mg_score = 0
+    pawn_eg_score = 0
+
     # Init bitboards
     occupied = board.occupied
     b_bitboards = [0, 0, 0, 0, 0, 0, 0]
@@ -177,10 +171,19 @@ def evaluate(board):
             bitboards[color][piece] = (squares, bb)
 
     # Evaluation
+    pawn_hash_in_table = False
+    pawn_hash_key = (bin(bitboards[chess.WHITE][chess.PAWN][1]), bin(bitboards[chess.BLACK][chess.PAWN][1]))
+    if pawn_hash_key in pawn_hash_table:
+        pawn_mg_score, pawn_eg_score = pawn_hash_table[pawn_hash_key]
+        pawn_hash_in_table = True
+
     for color in [chess.WHITE, chess.BLACK]:
         relative_weight = 1 if color == board.turn else -1
 
-        bb_king_zone = get_bb_king_zone(board.king(not color), not color) # Initialize enemy king zone, bonus applied to attacks on the enemy king zone
+        friend_king_square = bitboards[color][chess.KING][0][0]
+        enemy_king_square = bitboards[not color][chess.KING][0][0]
+
+        bb_king_zone = get_bb_king_zone(enemy_king_square, not color) # Initialize enemy king zone, bonus applied to attacks on the enemy king zone
         king_attack_units = 0
 
         for piece in [chess.PAWN, chess.KNIGHT, chess.BISHOP, chess.ROOK, chess.QUEEN, chess.KING]:
@@ -197,44 +200,45 @@ def evaluate(board):
 
                 # Piece-specific evaluation part 1
                 if piece == chess.PAWN:
-                    # Penalty to bishop by number of pawns on bishop's square color
-                    bishop_squares = bitboards[color][chess.BISHOP][0]
-                    if len(bishop_squares) != 2: # Technically incorrect, but situations with 2+ same colored bishops are unlikely
-                        for bishop_square in bishop_squares:
-                            if get_square_color(square) == get_square_color(bishop_square):
-                                piece_specific_mg_score += pawn_bishop_mg_penalty * relative_weight
-                                piece_specific_eg_score += pawn_bishop_eg_penalty * relative_weight
+                    if not pawn_hash_in_table:
+                        # Penalty to bishop by number of pawns on bishop's square color
+                        bishop_squares = bitboards[color][chess.BISHOP][0]
+                        if len(bishop_squares) != 2: # Technically incorrect, but situations with 2+ same colored bishops are unlikely
+                            for bishop_square in bishop_squares:
+                                if get_square_color(square) == get_square_color(bishop_square):
+                                    pawn_mg_score += pawn_bishop_mg_penalty * relative_weight
+                                    pawn_eg_score += pawn_bishop_eg_penalty * relative_weight
 
-                    # Bonus to passed pawn
-                    pawn_file = chess.BB_FILES[chess.square_file(square)]
-                    bb_passing_files = chess.SquareSet(pawn_file)
-                    if not is_square_A_file(square):
-                        pawn_left_file = chess.BB_FILES[chess.square_file(square - 1)]
-                        bb_passing_files |= chess.SquareSet(pawn_left_file)
-                    if not is_square_H_file(square):
-                        pawn_right_file = chess.BB_FILES[chess.square_file(square + 1)]
-                        bb_passing_files |= chess.SquareSet(pawn_right_file)
-                    if len(bb_passing_files & bitboards[not color][chess.PAWN][1]) == 0:
+                        # Bonus to passed pawn
+                        pawn_file = chess.BB_FILES[chess.square_file(square)]
+                        bb_passing_files = chess.SquareSet(pawn_file)
+                        if not is_square_A_file(square):
+                            pawn_left_file = chess.BB_FILES[chess.square_file(square - 1)]
+                            bb_passing_files |= chess.SquareSet(pawn_left_file)
+                        if not is_square_H_file(square):
+                            pawn_right_file = chess.BB_FILES[chess.square_file(square + 1)]
+                            bb_passing_files |= chess.SquareSet(pawn_right_file)
+                        if len(bb_passing_files & bitboards[not color][chess.PAWN][1]) == 0:
+                            if color == chess.WHITE:
+                                pawn_mg_score += passed_pawn_mg_bonus[square // 8] * relative_weight
+                                pawn_eg_score += passed_pawn_eg_bonus[square // 8] * relative_weight
+                            else:
+                                pawn_mg_score += passed_pawn_mg_bonus[8 - ((square // 8) + 1)] * relative_weight
+                                pawn_eg_score += passed_pawn_eg_bonus[8 - ((square // 8) + 1)] * relative_weight
+
+                        # Penalty to isolated pawn
+                        if len(bb_passing_files & bitboards[color][chess.PAWN][1]) != 3:
+                            pawn_mg_score += pawn_isolated_mg_penalty * relative_weight
+                            pawn_eg_score += pawn_isolated_eg_penalty * relative_weight
+                        
+                        # Bonus to space, defined by number of squares behind pawn (including the pawn's square itself)
+                        rank = chess.square_rank(square) + 1
                         if color == chess.WHITE:
-                            piece_specific_mg_score += passed_pawn_mg_bonus[square // 8] * relative_weight
-                            piece_specific_eg_score += passed_pawn_eg_bonus[square // 8] * relative_weight
+                            pawn_mg_score += rank * pawn_space_mg_bonus * relative_weight
+                            pawn_eg_score += rank * pawn_space_eg_bonus * relative_weight
                         else:
-                            piece_specific_mg_score += passed_pawn_mg_bonus[8 - ((square // 8) + 1)] * relative_weight
-                            piece_specific_eg_score += passed_pawn_eg_bonus[8 - ((square // 8) + 1)] * relative_weight
-
-                    # Penalty to isolated pawn
-                    if len(bb_passing_files & bitboards[color][chess.PAWN][1]) != 3:
-                        piece_specific_mg_score += pawn_isolated_mg_penalty * relative_weight
-                        piece_specific_eg_score += pawn_isolated_eg_penalty * relative_weight
-                    
-                    # Bonus to space, defined by number of squares behind pawn (including the pawn's square itself)
-                    rank = chess.square_rank(square) + 1
-                    if color == chess.WHITE:
-                        piece_specific_mg_score += rank * pawn_space_mg_bonus * relative_weight
-                        piece_specific_eg_score += rank * pawn_space_eg_bonus * relative_weight
-                    else:
-                        piece_specific_mg_score += (9 - rank) * pawn_space_mg_bonus * relative_weight
-                        piece_specific_eg_score += (9 - rank) * pawn_space_eg_bonus * relative_weight
+                            pawn_mg_score += (9 - rank) * pawn_space_mg_bonus * relative_weight
+                            pawn_eg_score += rank * pawn_space_eg_bonus * relative_weight
 
                 elif piece == chess.KNIGHT:
                     # Bonus to knight on outpost (a square on rank 4, 5, or 6 defended by a friendly pawn)
@@ -243,8 +247,8 @@ def evaluate(board):
                     if (color == chess.WHITE and (rank == 4 or rank == 5 or rank == 6)) or \
                         ((color == chess.BLACK) and (rank == 5 or rank == 4 or rank == 3)):
                             if len(board.attackers(color, square) & bb_pawns) >= 1:
-                                piece_specific_mg_score += knight_outpost_mg_bonus * relative_weight
-                                piece_specific_eg_score += knight_outpost_eg_bonus * relative_weight
+                                piece_specific_mg_score += outpost_mg_bonus * relative_weight
+                                piece_specific_eg_score += outpost_eg_bonus * relative_weight
 
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
@@ -253,6 +257,15 @@ def evaluate(board):
                     mobility_score += count_bin(chess.BB_KNIGHT_ATTACKS[square] & ~occupied)
 
                 elif piece == chess.BISHOP:
+                    # Bonus to bishop on outpost (a square on rank 4, 5, or 6 defended by a friendly pawn)
+                    bb_pawns = bitboards[color][chess.PAWN][1]
+                    rank = chess.square_rank(square) + 1
+                    if (color == chess.WHITE and (rank == 4 or rank == 5 or rank == 6)) or \
+                        ((color == chess.BLACK) and (rank == 5 or rank == 4 or rank == 3)):
+                            if len(board.attackers(color, square) & bb_pawns) >= 1:
+                                piece_specific_mg_score += outpost_mg_bonus * relative_weight
+                                piece_specific_eg_score += outpost_eg_bonus * relative_weight
+
                     # Bonus to attacks on the enemy king zone
                     king_attack_units += len(board.attacks(square) & bb_king_zone) * 2
 
@@ -280,6 +293,24 @@ def evaluate(board):
                     mobility_score += count_bin((chess.BB_RANK_ATTACKS[square][chess.BB_RANK_MASKS[square] & occupied] \
                                                | chess.BB_FILE_ATTACKS[square][chess.BB_FILE_MASKS[square] & occupied]) & ~occupied)
 
+                    # Penalty if trapped by king, more so if king cannot castle
+                    rook_file = chess.square_file(square) + 1
+                    king_file = chess.square_file(friend_king_square) + 1
+                    if king_file <= 4 and rook_file < king_file:
+                        if board.has_queenside_castling_rights(color):
+                            piece_specific_mg_score += rook_trapped_mg_penalty * relative_weight
+                            piece_specific_eg_score += rook_open_file_eg_bonus * relative_weight
+                        else:
+                            piece_specific_mg_score += rook_trapped_nocastle_mg_penalty * relative_weight
+                            piece_specific_eg_score += rook_trapped_nocastle_eg_penalty * relative_weight
+                    elif king_file >= 5 and rook_file > king_file:
+                        if board.has_kingside_castling_rights(color):
+                            piece_specific_mg_score += rook_trapped_mg_penalty * relative_weight
+                            piece_specific_eg_score += rook_open_file_eg_bonus * relative_weight
+                        else:
+                            piece_specific_mg_score += rook_trapped_nocastle_mg_penalty * relative_weight
+                            piece_specific_eg_score += rook_trapped_nocastle_eg_penalty * relative_weight
+
                 elif piece == chess.QUEEN:
                     # Penalty to pinned queen
                     squares_foe_sliders = bitboards[not color][chess.BISHOP][0] + bitboards[not color][chess.ROOK][0] + bitboards[not color][chess.QUEEN][0]
@@ -302,6 +333,9 @@ def evaluate(board):
         king_attack_units = min(king_attack_units, 61)
         piece_specific_score += king_threat_table[king_attack_units] * relative_weight
 
+    # Score pawn evaluation in pawn hash table
+    pawn_hash_table[pawn_hash_key] = (pawn_mg_score, pawn_eg_score)
+
     # Tapered evaluation
     mg_phase = max(phase, total_phase)
     eg_phase = total_phase - mg_phase
@@ -310,6 +344,8 @@ def evaluate(board):
     psqt_score = (psqt_mg_score * mg_phase + psqt_eg_score * eg_phase) / total_phase
 
     # Piece-specific evaluation part 1
+    piece_specific_mg_score += pawn_mg_score
+    piece_specific_eg_score += pawn_eg_score
     piece_specific_score += (piece_specific_mg_score * mg_phase + piece_specific_eg_score * eg_phase) / total_phase
     
     # Totaling scores

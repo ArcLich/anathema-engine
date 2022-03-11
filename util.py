@@ -26,6 +26,7 @@ MATE_SCORE = 99999
 ttable = {} # Transposition table
 htable = [[[0 for x in range(64)] for y in range(64)] for z in range(2)] # History heuristic table [side to move][move from][move to]
 rtable = {} # Draw by repetition table
+pawn_hash_table = {} # Transposition table just for pawn scoring
 
 # UCI
 nodes = 0 # Number of positions considered
