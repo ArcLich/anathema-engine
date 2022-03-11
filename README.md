@@ -50,8 +50,6 @@ Alternatively, you can save the engine as an executable and run with any chess G
 > 
 > Added check for drawn transpositions as a draw in another branch may not be a draw in this branch. Will recalculate those positions.
 > 
-> Gives bonus to bishops on outpost squares.
-> 
 > Gives penalty to rooks trapped by their king.
 
 3/11/22 v1.9.3
