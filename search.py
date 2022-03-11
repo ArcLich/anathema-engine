@@ -18,18 +18,18 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     if can_exit_search(movetime, stop, start_time):
         return 0
 
+    stand_pat = evaluate(board)
+    nodes += 1
+    
+    if stand_pat >= beta:
+        return beta
     if not board.is_check():
-        stand_pat = evaluate(board)
-        nodes += 1
-        
-        if stand_pat >= beta:
-            return beta
         alpha = max(alpha, stand_pat)
 
     moves = list(board.generate_legal_moves())
-    moves.sort(key = lambda move : rate(board, move, None), reverse = True)
+    moves.sort(key = lambda move : rate(board, move, None), reverse = True) # Significant improvements if sorted
     for move in moves:
-        if board.gives_check(move) or board.is_capture(move):
+        if board.is_capture(move) or board.gives_check(move):
             board.push(move)
             score = -qsearch(board, -beta, -alpha, movetime, stop)
             board.pop()
@@ -41,15 +41,11 @@ def qsearch(board, alpha, beta, movetime = INF, stop = lambda: False):
     return alpha
 
 
-
 def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
     """
     Searches the possible moves using negamax, alpha-beta pruning, transposition table,
     quiescence search, null move pruning, and late move reduction
     Initial psuedocode adapated from Jeroen W.T. Carolus
-
-    TODO
-    - parallel search
     """
     global nodes
     
@@ -159,7 +155,6 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
     
     move = None
     score = -INF
-    results = []
     d = 0
     for d in range(1, depth + 1):
         if can_exit_search(movetime, stop, start_time):
@@ -170,10 +165,6 @@ def iterative_deepening(board, depth, movetime = INF, stop = lambda: False):
         if not can_exit_search(movetime, stop, start_time):
             stdout.write(uci_output(move, score, d, nodes, start_time))
             stdout.flush()
-            results.append([move, score, d, nodes, start_time])
-
-    if results:
-        move, score, d, nodes, start_time = results[-1]
 
     # Print out info
     stdout.write(uci_output(move, score, d, nodes, start_time))

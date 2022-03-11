@@ -144,7 +144,7 @@ def evaluate(board):
     if ENDGAME_BOOK and get_num_pieces(board) <= 5:
         return eval_endgame(board)
     
-    material_values = [100, 320, 330, 500, 900, MATE_SCORE]
+    material_values = (100, 320, 330, 500, 900, MATE_SCORE)
     mg_psqts = {
         "P": w_mg_pawn_table,
         "N": w_mg_knight_table,
@@ -173,14 +173,14 @@ def evaluate(board):
         "q": b_eg_queen_table,
         "k": b_eg_king_table,
     }
-    phase_scores = [0, 1, 1, 2, 4, 0]
-    king_threat_table = [0,  0,   1,   2,   3,   5,   7,   9,  12,    15, \
+    phase_scores = (0, 1, 1, 2, 4, 0)
+    king_threat_table = (0,  0,   1,   2,   3,   5,   7,   9,  12,    15, \
                         18,  22,  26,  30,  35,  39,  44,  50,  56,   62, \
                         68,  75,  82,  85,  89,  97, 105, 113, 122,  131, \
                         140, 150, 169, 180, 191, 202, 213, 225, 237, 248, \
                         260, 272, 283, 295, 307, 319, 330, 342, 354, 366, \
                         377, 389, 401, 412, 424, 436, 448, 459, 471, 483, \
-                        494, 500]
+                        494, 500)
 
     material_score = 0
     psqt_mg_score = 0

@@ -100,7 +100,7 @@ def null_move_ok(board):
     Returns false if side to move is in check or too few pieces (indicator of endgame, more chance for zugzwang)
     """
     endgame_threshold = 14 # TODO adjust threshold
-    if (board.ply() >= 1 and board.peek() == chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
+    if (board.move_stack and board.peek() == chess.Move.null()) or board.is_check() or get_num_pieces(board) <= endgame_threshold:
         return False
     return True
 
