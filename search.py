@@ -56,18 +56,19 @@ def negamax(board, depth, alpha, beta, movetime = INF, stop = lambda: False):
     tt_move = None
 
     # Search for position in the transposition table
-    if key in ttable: # TODO draw score in tt_table by repetition
+    if key in ttable:
         tt_depth, tt_move, tt_score, flag = ttable[key]
         if tt_depth >= depth:
-            nodes += 1
-            if flag == "EXACT":
-                return (tt_move, tt_score)
-            elif flag == "LOWERBOUND":
-                alpha = max(alpha, tt_score)
-            elif flag == "UPPERBOUND":
-                beta = min(beta, tt_score)
-            if alpha >= beta:
-                return (tt_move, tt_score)
+            if tt_score != 0: # Prevent mistakingly detecting this position as draw by repetition due to transposition in another branch
+                nodes += 1
+                if flag == "EXACT":
+                    return (tt_move, tt_score)
+                elif flag == "LOWERBOUND":
+                    alpha = max(alpha, tt_score)
+                elif flag == "UPPERBOUND":
+                    beta = min(beta, tt_score)
+                if alpha >= beta:
+                    return (tt_move, tt_score)
 
     old_alpha = alpha
     if depth <= 0 or is_game_over(board):
