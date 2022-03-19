@@ -3,8 +3,8 @@ Not Magnus
 Classical chess engine by Devin Zhang
 Evaluation functions which score a given position
 """
-import os
 import chess.gaviota
+import chess.polyglot
 from evaluation_values import *
 from util import *
 
@@ -79,7 +79,7 @@ def eval_endgame(board):
     Evaluates an endgame position with 5 or less pieces
     Returns depth-to-mate from Gaviota endgame tablebase
     """
-    with chess.gaviota.open_tablebase(os.path.dirname(os.path.realpath(__file__)) + ENDGAME_BOOK_LOCATION) as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
+    with chess.gaviota.open_tablebase(ENDGAME_BOOK_LOCATION) as tablebase: # https://chess.cygnitec.com/tablebases/gaviota/
         if board.is_checkmate():
             return INF
         score = tablebase.get_dtm(board) * MATE_SCORE
@@ -119,9 +119,6 @@ def evaluate(board):
     Material score values from Tomasz Michniewski's Simplified Evaluation Function
     Tapered evaluation and piece-square table values from Ronald Friederich's PeSTO's Evaluation Function
     Other select values from Stockfish
-
-    TODO
-    - fine tune weights and values (Texel's tuning method)
     """
     game_state = get_game_state(board)
     if game_state == 1: # Game is checkmate
